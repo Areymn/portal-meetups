@@ -9,8 +9,18 @@ const cors = require("cors");
 const app = express();
 
 //Middlewares basicos
-app.use(bodyParser.json()); // Parsear JSON en el body de las solicitudes
-app.use(cors()); // Permitir peticiones desde otros dominios
+app.use(express.json()); // Parsear JSON en el body de las solicitudes
+
+const path = require("path");
+app.use("/static", express.static(path.join(__dirname, "public"))); // Estaticos
+
+app.use(
+  cors({
+    origin: "*", // Permite todas las solicitudes (puedes restringirlo a dominios específicos)
+    methods: ["GET", "POST", "PUT", "DELETE"], // Métodos permitidos
+    allowedHeaders: ["Content-Type", "Authorization"], // Cabeceras permitidas
+  })
+); // Permitir peticiones desde otros dominios
 
 //Rutas base, de prueba para ver que el servidor funcione
 app.get("/", (req, res) => {
