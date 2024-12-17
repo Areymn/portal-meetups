@@ -52,6 +52,7 @@ const registerUser = async (req, res) => {
 
     //Encriptar la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log(hashedPassword);
 
     //Guardar el usuario en la base de datos
     const newUser = { email, username, password: hashedPassword };

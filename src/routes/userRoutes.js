@@ -8,6 +8,8 @@ const router = express.Router();
 
 const { passwordRecovery } = require("../controllers/userController");
 
+const { authenticateUser } = require("../middlewares/authMiddleware");
+
 // Ruta de registro de usuarios
 router.post("/register", registerUser);
 
@@ -30,5 +32,14 @@ module.exports = router;
 
 //Ruta recuperacion de contraseña
 router.post("/password-recovery", passwordRecovery);
+
+module.exports = router;
+
+//Ruta para autenticacion
+router.get("/protected", authenticateUser, (req, res) => {
+  res
+    .status(200)
+    .json({ message: "Ruta protegida accedida con éxito", user: req.user });
+});
 
 module.exports = router;
