@@ -1,21 +1,24 @@
 "use strict";
 
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-const Joi = require("joi");
+const jwt = require("jsonwebtoken"); // Para generar y verificar tokens JWT
+const bcrypt = require("bcryptjs"); // Para encriptar y comparar contraseñas
+const Joi = require("joi"); // Para validar los datos recibidos
+const nodemailer = require("nodemailer"); // Para enviar correos (simulado)
+const crypto = require("crypto"); // Para generar códigos únicos (recuperación de contraseña)
 
-//contraseña
-const nodemailer = require("nodemailer");
-const crypto = require("crypto");
-
-//LOGIN
+//Clave secreta para JWT, tomada de variables de entorno (log in)
 const JWT_SECRET = process.env.JWT_SECRET || "secret_key"; // Clave secreta para el token
 
-//Base de datos simulada
+// Base de datos simulada (temporal, mientras no se use una base de datos real)
 const users = [];
 
-// Crear un usuario temporal con contraseña encriptada
+// Almacén temporal de códigos de recuperación
+const recoveryCodes = {}; // Guardar los códigos de recuperación temporalmente
+
+// ------------------------- CREAR USUARIO TEMPORAL -------------------------
+
 (async () => {
+  // Creacion de un usuario temporal con contraseña encriptada
   const hashedPassword = await bcrypt.hash("123456", 10); // Contraseña temporal: 123456
   users.push({
     email: "test@example.com",
@@ -25,12 +28,18 @@ const users = [];
   console.log("Usuario temporal creado:", users);
 })();
 
-//Controlador para registrar usarios
+// ------------------------- REGISTRO DE USUARIOS -------------------------
+
+/**
+ * Controlador para registrar usuarios.
+ * Valida los datos de entrada, encripta la contraseña y guarda el usuario.
+ */
+
 const registerUser = async (req, res) => {
   try {
-    console.log("Solicitud recibida:", req.body);
+    console.log("Solicitud recibida:", req.body); // Log para depuración
 
-    //Validar los datos del body
+    // Validar los datos del body con Joi
     const schema = Joi.object({
       email: Joi.string().email().required(),
       username: Joi.string().min(3).max(30).required(),
@@ -50,10 +59,10 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ error: "El email ya esta registrado." });
     }
 
-    //Encriptar la contraseña
+    //Encriptar la contraseña antes de guardarla
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    //Guardar el usuario en la base de datos
+    //Guardar el usuario en la base de datos simulada
     const newUser = { email, username, password: hashedPassword };
     users.push(newUser);
 
@@ -67,50 +76,63 @@ const registerUser = async (req, res) => {
 
 module.exports = { registerUser };
 
+// ------------------------- LOGIN DE USUARIOS -------------------------
+
+/**
+ * Controlador para el login de usuarios.
+ * Valida credenciales, compara contraseñas y genera un token JWT.
+ */
+
 // Controlador para el login de usuarios
 const loginUser = async (req, res) => {
-  // Validar los datos del body
-  const schema = Joi.object({
-    email: Joi.string().email().required(),
-    password: Joi.string().min(6).required(),
-  });
+  try {
+    // Validar los datos del body
+    const schema = Joi.object({
+      email: Joi.string().email().required(),
+      password: Joi.string().min(6).required(),
+    });
 
-  const { error } = schema.validate(req.body);
-  if (error) {
-    return res.status(400).json({ error: error.details[0].message });
+    const { error } = schema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const { email, password } = req.body;
+
+    // Buscar el usuario en la base de datos simulada
+    const user = users.find((u) => u.email === email);
+    if (!user) {
+      return res.status(400).json({ error: "El usuario no existe." });
+    }
+
+    // Verificar la contraseña encriptada
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Contraseña incorrecta." });
+    }
+
+    // Generar un token JWT con una expiracion de 1 hora
+    const token = jwt.sign(
+      { email: user.email, username: user.username },
+      JWT_SECRET,
+      { expiresIn: "1h" } // El token expira en 1 hora
+    );
+
+    // Responder con el token
+    res.status(200).json({ message: "Login exitoso", token });
+  } catch (err) {
+    console.error("Error en loginUser:", err.message);
+    res.status(500).json({ error: "Error interno del servidor." });
   }
-
-  const { email, password } = req.body;
-
-  // Buscar el usuario en la base de datos
-  const user = users.find((u) => u.email === email);
-  if (!user) {
-    return res.status(400).json({ error: "El usuario no existe." });
-  }
-
-  // Verificar la contraseña
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
-    return res.status(401).json({ error: "Contraseña incorrecta." });
-  }
-
-  // Generar un token JWT
-  const token = jwt.sign(
-    { email: user.email, username: user.username },
-    JWT_SECRET,
-    { expiresIn: "1h" } // El token expira en 1 hora
-  );
-
-  // Responder con el token
-  res.status(200).json({ message: "Login exitoso", token });
 };
 
 module.exports = { registerUser, loginUser };
 
-// ENDPOINT CAMBIO CONTRASEÑA
+// ------------------------- CAMBIO DE CONTRASEÑA -------------------------
 
-// Base de datos simulada
-const recoveryCodes = {}; // Guardar los códigos de recuperación temporalmente
+/**
+ * Cambia la contraseña de un usuario utilizando un código de recuperación.
+ */
 
 // Función para recuperación de contraseña
 const passwordRecovery = async (req, res) => {
