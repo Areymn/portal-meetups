@@ -1,0 +1,1 @@
+// Se encontrarán ficheros que realicen funciones relacionadas entre sí (por ejemplo, un servicio de errores)
