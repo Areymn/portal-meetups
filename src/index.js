@@ -4,6 +4,7 @@ require("dotenv").config(); // carga variables entorno
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const userRoutes = require("./routes/userRoutes");
 
 // Inicializamos la aplicación Express
 const app = express();
@@ -22,7 +23,11 @@ app.use(
   })
 ); // Permitir peticiones desde otros dominios
 
+// Rutas de usuarios
+app.use("/api/users", userRoutes);
+
 //Rutas base, de prueba para ver que el servidor funcione
+
 app.get("/", (req, res) => {
   res.send("Servidor funcionando correctamente.");
 });
