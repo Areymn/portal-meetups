@@ -1,1 +1,0 @@
-// Aquí se inician y se crean las tablas para la db
