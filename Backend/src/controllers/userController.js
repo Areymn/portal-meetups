@@ -74,8 +74,6 @@ const registerUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser };
-
 // ------------------------- LOGIN DE USUARIOS -------------------------
 
 /**
@@ -126,12 +124,10 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
-
 // ------------------------- CAMBIO DE CONTRASEÑA -------------------------
 
 /**
- * Cambia la contraseña de un usuario utilizando un código de recuperación.
+ * Genera un código de recuperación de contraseña y lo "envía" por correo.
  */
 
 // Función para recuperación de contraseña
@@ -154,7 +150,7 @@ const passwordRecovery = async (req, res) => {
     return res.status(404).json({ error: "El email no está registrado." });
   }
 
-  // Generar un código único
+  // Generar y guarda un código único
   const recoveryCode = crypto.randomBytes(20).toString("hex");
   recoveryCodes[email] = recoveryCode;
   console.log("Código generado:", recoveryCode); // Log para confirmar
@@ -166,6 +162,11 @@ const passwordRecovery = async (req, res) => {
     .status(200)
     .json({ message: "Código de recuperación enviado por correo." });
 };
+
+// ------------------------- CAMBIO DE CONTRASEÑA -------------------------
+/**
+ * Cambia la contraseña de un usuario utilizando un código de recuperación.
+ */
 
 // Función para cambiar la contraseña
 const changePassword = async (req, res) => {
@@ -202,11 +203,11 @@ const changePassword = async (req, res) => {
         .json({ error: "Código de recuperación inválido." });
     }
 
-    // Encriptar la nueva contraseña
+    // Encriptar y actualizar la nueva contraseña
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
 
-    // Eliminar el código usado
+    // Eliminar el código de recuperación usado
     delete recoveryCodes[email];
 
     res.status(200).json({ message: "Contraseña actualizada correctamente." });

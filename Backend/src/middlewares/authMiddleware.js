@@ -1,22 +1,35 @@
 "use strict";
 
-const jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken"); // Importa la librería JWT para verificar los tokens
 
-//Middleware de autenticacion
+/**
+ * Middleware de autenticación.
+ * Verifica la validez de un token JWT en el encabezado `Authorization`.
+ * Si es válido, añade los datos del usuario a `req.user`.
+ */
+
 const authenticateUser = (req, res, next) => {
-  const token = req.headers["authorization"]; // Lee el token del encabezado
+  // Extraer el token del encabezado Authorization
+  const token = req.headers["authorization"];
 
+  // Si no existe el token, devuelve un error 401 (No autorizado)
   if (!token) {
-    return res.status(401).json({ error: "No se proporciono un token" }); //No autorizado
+    return res.status(401).json({ error: "No se proporciono un token" });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verificar el token
-    req.user = decoded; // Adjuntar el usuario decodificado a la solicitud
-    next(); // Pasar al siguiente middleware o controlador
+    // Verificar el token utilizando la clave secreta
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Adjuntar el usuario decodificado del usuario a la solicitud
+    req.user = decoded;
+
+    // Pasar al siguiente middleware o controlador
+    next();
   } catch (err) {
-    return res.status(403).json({ error: "Token inválido o expirado" }); //Prohibido
+    // Si el token es inválido o expirado, devuelve un error 403 (Prohibido)
+    return res.status(403).json({ error: "Token inválido o expirado" });
   }
 };
 
-module.exports = { authenticateUser };
+module.exports = { authenticateUser }; // Exportar la función para usarla en rutas protegidas
