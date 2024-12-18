@@ -10,6 +10,7 @@ const {
   passwordRecovery,
   changePassword,
 } = require("../controllers/userController");
+const { authenticateUser } = require("../middlewares/authMiddleware.js");
 
 const router = express.Router(); // Crear una instancia del router de Express
 
@@ -28,6 +29,13 @@ router.post("/password-recovery", passwordRecovery);
 router.post("/change-password", (req, res) => {
   console.log("Ruta /change-password alcanzada");
   changePassword(req, res);
+});
+
+router.get("/protected", authenticateUser, (req, res) => {
+  res.status(200).json({
+    message: "Ruta protegida accedida con éxito",
+    user: req.user, // Información del usuario autenticado
+  });
 });
 
 // ------------------------- EXPORTAR RUTAS -------------------------
