@@ -3,20 +3,25 @@
 console.log('Rutas de meetups cargadas correctamente');
 
 // Importar dependencias
-const express = require('express');
-const { createEvent } = require('../controllers/meetups/createEvent');
-const { detailEvent } = require('../controllers/meetups/detailEvent');
-const { sortEvent } = require('../controllers/meetups/sortEvent');
-const { signupEvent } = require('../controllers/meetups/signupEvent');
-const { authenticateUser } = require('../middlewares/authMiddleware.js');
+const express = import('express');
+const { createEvent } = import('../controllers/meetups/createEvent');
+const { detailEvent } = import('../controllers/meetups/detailEvent');
+const { sortEvent } = import('../controllers/meetups/sortEvent');
+const { signupEvent } = import('../controllers/meetups/signupEvent');
+const { authenticateUser } = import('../middlewares/authMiddleware.js');
 const router = express.Router(); // Crear una instancia del router de Express
 
-// ------------------------- RUTAS DE USUARIOS -------------------------
+// ------------------------- RUTAS DE MEETUPS -------------------------
 
-// Ruta de registro de usuarios
-router.post('/create', createEventregisterUser);
+// Rutas de meetups
 
-router.post('/');
+router.post('/create', authenticateUser, createEvent);
+
+router.post('/signup', authenticateUser, signupEvent);
+
+router.post('/detail', detailEvent);
+
+router.post('/', sortEvent);
 
 // ------------------------- EXPORTAR RUTAS -------------------------
 module.exports = router;
