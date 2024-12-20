@@ -8,6 +8,7 @@ const bodyParser = require("body-parser"); // Middleware para parsear cuerpos JS
 const cors = require("cors"); // Middleware para permitir solicitudes de otros dominios
 const path = require("path"); // Módulo para manejar rutas de archivos
 const userRoutes = require("./routes/userRoutes"); // Importar rutas de usuarios
+const meetups = require("./routes/meetups"); // Importa las rutas de los meetups
 
 // ------------------------- INICIALIZAR APP -------------------------
 
@@ -35,6 +36,9 @@ app.use("/api/users", userRoutes);
 app.get("/", (req, res) => {
   res.send("Servidor funcionando correctamente.");
 });
+
+// Ruta que accede a los controladores de los meetups
+app.use("/api/meetups", meetups);
 
 // ------------------------- MANEJO DE ERRORES -------------------------
 
