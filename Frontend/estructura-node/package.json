@@ -2,10 +2,10 @@
   "name": "frontend",
   "type": "module",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "initDb": "node ./src/db/initDB.js"
   },
   "keywords": [],
   "author": "",
@@ -14,5 +14,6 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "mysql2": "^3.11.5"
-  }
+  },
+  "description": ""
 }
