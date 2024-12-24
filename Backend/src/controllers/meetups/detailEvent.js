@@ -3,9 +3,7 @@
 // -------------------------
 // IMPORTAR DEPENDENCIAS
 // -------------------------
-
-// Importar los eventos desde el archivo donde se almacenan.
-const { events } = import('./createEvent');
+import { getEvents } from '../../db/events';
 
 // -------------------------
 // FUNCIÓN PARA VER LOS DETALLES DE UN EVENTO
@@ -34,7 +32,7 @@ const getEventDetails = (req, res) => {
         }
 
         // Buscar el evento con el ID proporcionado.
-        const event = events.find(e => e.id === id);
+        const event = getEvents(id);
 
         // Si el evento no existe, devolver un error 404.
         if (!event) {

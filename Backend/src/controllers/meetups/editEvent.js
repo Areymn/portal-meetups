@@ -3,11 +3,12 @@
 // -------------------------
 // IMPORTAR DEPENDENCIAS
 // -------------------------
-import { createEvent } from "../../db/events";
 
-// Importa la librería Joi para validar los datos de entrada del usuario.
+// Importar la librería Joi para validar los datos de entrada del usuario.
 // Joi es útil para garantizar que los datos cumplan con un formato específico antes de procesarlos.
 const Joi = import('joi');
+
+import { getEvents, updateEvent } from '../../db/events';
 
 // -------------------------
 // FUNCIÓN PARA CREAR EVENTOS
@@ -18,7 +19,8 @@ const Joi = import('joi');
  * @param {Object} req - La solicitud HTTP que contiene los datos del evento en `req.body`.
  * @param {Object} res - La respuesta HTTP que se devolverá al cliente.
  */
-const createEvents = async (req, res) => {
+
+const editEvent = async (req, res) => {
 	try {
 		// Log para depuración: imprime los datos enviados en la solicitud.
 		console.log('Solicitud recibida:', req.body);
@@ -43,29 +45,33 @@ const createEvents = async (req, res) => {
 			return res.status(400).json({ error: error.details[0].message });
 		}
 
-		// Extraer los datos validados del cuerpo de la solicitud.
-		const { id, name, place, time, user, type, attendees } = req.body;
+        // Busca el evento por ID
+        const event = getEvents(req.body.id);
+		// const event = events.find((e) => e.id === value.id);
+		if (!event) {
+			return res.status(404).json({ error: 'Evento no encontrado.' });
+		}
 
-		// TODO: Generate a unique ID for event
+        // Busca en req.body y actualiza el evento
+        for (const key in req.body) {
+            if (Object.hasOwnProperty.call(req.body, key)) { // Don't loop through prototype chain
+                event[key] = req.body[key];
+            }
+        }
 
-		// Crear un nuevo objeto de evento con los datos recibidos.
-		const newEvent = { id, name, place, time, user, type, attendees };
+		// Reemplaza el evento original con el actualizado en la base de datos
+        updateEvent(req.body.id, event);
+        // events[events.indexOf(event)] = event;
 
-		// Agregar el nuevo evento al array `events`.
-		createEvent(newEvent);
-
-		// Log para depuración: imprime la lista actualizada de eventos.
-		console.log(newEvent);
-
-		// Enviar una respuesta con el código 201 para indicar que el evento fue creado exitosamente.
+		// Envia una respuesta con el código 201 para indicar que el evento fue creado exitosamente.
 		return res.status(201).json({ message: 'Evento registrado con éxito.' });
 	} catch (err) {
 		// Capturar y manejar cualquier error inesperado que ocurra durante el proceso.
 
-		// Imprimir el mensaje de error en la consola para fines de depuración.
+		// Imprime el mensaje de error en la consola para fines de depuración.
 		console.error('Error en el controlador:', err.message);
 
-		// Enviar una respuesta con el código 500 para indicar un error interno del servidor.
+		// Envia una respuesta con el código 500 para indicar un error interno del servidor.
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 };
@@ -75,4 +81,4 @@ const createEvents = async (req, res) => {
 // -------------------------
 
 // Exportar la función `createEvents` para que pueda ser utilizada en otros módulos.
-module.exports = { createEvents };
+module.exports = { editEvent };
