@@ -1,69 +1,44 @@
 'use strict';
 
-// Importar los eventos desde el módulo correspondiente
-const { events } = import('./createEvent'); 
-
-// -------------------------
-// FUNCIÓN GENÉRICA: ORDENAR ARREGLOS POR PROPIEDAD
-// -------------------------
-
-/**
- * Ordena un arreglo de objetos basado en una propiedad específica.
- * @param {Array} arr - El array que se desea ordenar.
- * @param {string} property - La propiedad por la cual se ordenará el arreglo.
- * @param {string} order - El orden de la ordenación: 'asc' para ascendente, 'desc' para descendente.
- * @returns {Array} El array ordenado.
- */
-function sortArrayByProperty(arr, property, order = 'asc') {
-    return arr.sort((a, b) => {
-        // Verificar si la propiedad es de tipo número en ambos objetos.
-        if (typeof a[property] === 'number' && typeof b[property] === 'number') {
-            // Ordenar números: ascendente o descendente según el argumento `order`.
-            return order === 'asc' ? a[property] - b[property] : b[property] - a[property];
-        } 
-        // Verificar si la propiedad es de tipo string en ambos objetos.
-        else if (typeof a[property] === 'string' && typeof b[property] === 'string') {
-            // Ordenar cadenas alfabéticamente: ascendente o descendente según el argumento `order`.
-            return order === 'asc' ? a[property].localeCompare(b[property]) : b[property].localeCompare(a[property]);
-        } 
-        // Si los tipos no son comparables (ni número ni cadena), mantener el orden original.
-        else {
-            return 0;
-        }
-    });
-}
+import { getSortedEvents } from "../../db/events";
+const Joi = import('joi');
 
 // -------------------------
 // FUNCIÓN ESPECÍFICA: ORDENAR EVENTOS
 // -------------------------
 
-/**
- * Ordena los eventos disponibles según una propiedad y un orden proporcionados.
- * @param {string} property - La propiedad por la cual se ordenarán los eventos.
- * @param {string} order - El orden de la ordenación: 'asc' para ascendente, 'desc' para descendente.
- * @returns {Array} La lista de eventos ordenada.
- */
-function sortEvents(property, order = 'asc') {
-    // Validar que la lista de eventos exista y no esté vacía.
-    if (!events || events.length === 0) {
-        console.error('No hay eventos para ordenar.'); // Mensaje de error si no hay eventos.
-        return []; // Retornar un array vacío si no hay eventos disponibles.
-    }
+const getEvents = async (req, res) => {
+	try {
 
-    // Validar que la propiedad especificada exista en los objetos de eventos.
-    if (!Object.prototype.hasOwnProperty.call(events[0], property)) {
-        console.error(`La propiedad "${property}" no existe en los eventos.`); // Mensaje de error si la propiedad no es válida.
-        return []; // Retornar un array vacío si la propiedad no existe.
-    }
+		const schema = Joi.object({
+			sort: Joi.string().min(3).max(3).required(), 
+			type: Joi.string().min(3).max(10).required(), 
+		});
 
-    // Llamar a la función genérica para ordenar el arreglo de eventos.
-    return sortArrayByProperty(events, property, order);
-}
+		// Validar los datos de la solicitud utilizando el esquema definido.
+		const { isValidated, error } = schema.validate(req.body);
+
+		// Si los datos no son válidos, devolver un error 400 al cliente con el detalle del error.
+		if (!isValidated) {
+			return res.status(400).json({ error: error.details[0].message });
+		}
+		
+        const events = getSortedEvents(req.body.sort, req.body.type);
+
+		// Enviar una respuesta con el código 201 para indicar que el evento fue creado exitosamente.
+		return res.status(201).json({ data: events });
+	} catch (err) {
+		// Imprimir el mensaje de error en la consola para fines de depuración.
+		console.error('Error en el controlador:', err.message);
+
+		// Enviar una respuesta con el código 500 para indicar un error interno del servidor.
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+};
 
 // -------------------------
 // EXPORTAR FUNCIONES
 // -------------------------
 
 // Exportar la función `sortEvents` para que pueda ser utilizada en otros módulos.
-module.exports = { sortEvents };
-
+module.exports = { getEvents };

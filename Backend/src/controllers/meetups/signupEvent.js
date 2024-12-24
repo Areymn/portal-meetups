@@ -8,23 +8,11 @@
 // Joi se utiliza para asegurar que los datos proporcionados cumplen con los requisitos establecidos
 const Joi = import('joi');
 
+import { updateEvent } from '../../db/events';
+
 // ===========================================
 // BASE DE DATOS SIMULADA
 // ===========================================
-
-// Lista de eventos simulados que actúa como una base de datos temporal
-// Cada evento incluye un ID, nombre, lugar, hora, usuario asociado, tipo y lista de asistentes
-const events = [
-	{
-		id: 0,
-		name: 'Event', // Nombre del evento
-		place: 'Place', // Lugar del evento
-		time: 'Time', // Hora del evento (debería ser una fecha válida)
-		user: 'User', // Usuario asociado al evento
-		type: 'Type', // Tipo del evento
-		attendees: [], // Lista de asistentes al evento
-	},
-];
 
 // ===========================================
 // FUNCIÓN: INSCRIPCIÓN A UN EVENTO
@@ -55,7 +43,7 @@ const signupEvents = async (req, res) => {
 		}
 
 		// Agregar al usuario a la lista de asistentes del evento
-		events[0].attendees.push(value.user);
+		updateEvent(value.id, value.user);
 
 		// Log de éxito
 		console.log('¡Has sido añadido al evento!');
@@ -115,6 +103,9 @@ const cancelSignup = (req, res) => {
 
 		// Eliminar al usuario de la lista de asistentes
 		event.attendees.splice(attendeeIndex, 1);
+
+		// Actualizar el evento en la base de datos
+		updateEvent(value.id, event);
 
 		// Confirmar la cancelación al cliente
 		console.log(
