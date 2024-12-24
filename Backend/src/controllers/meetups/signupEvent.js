@@ -129,3 +129,28 @@ const cancelSignup = (req, res) => {
 
 // Exportar las funciones para que puedan ser utilizadas en otros módulos
 module.exports = { signupEvents, cancelSignup };
+
+
+// -------------------------------------------
+// EJEMPLOS DE USO Y SALIDA
+// -------------------------------------------
+
+/*
+Ejemplo de evento:
+const events = [
+    { id: 1, name: 'Evento A', attendees: ['User1'] },
+    { id: 2, name: 'Evento B', attendees: [] },
+];
+
+1. Inscribir al usuario "User2" en el evento con ID 1:
+   Llamada: signupEvents({ body: { id: 1, user: 'User2' } }, res);
+   Salida:
+   - Log: "¡Usuario User2 añadido al evento con ID 1!"
+   - Respuesta al cliente: { message: 'Registrado con éxito.' }
+
+2. Cancelar la inscripción del usuario "User1" del evento con ID 1:
+   Llamada: cancelSignup({ body: { id: 1, user: 'User1' } }, res);
+   Salida:
+   - Log: "Inscripción cancelada para el usuario User1 en el evento con ID 1."
+   - Respuesta al cliente: { message: 'Inscripción cancelada con éxito.' }
+*/

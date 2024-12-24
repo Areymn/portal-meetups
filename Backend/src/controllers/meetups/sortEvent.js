@@ -42,3 +42,38 @@ const getEvents = async (req, res) => {
 
 // Exportar la función `sortEvents` para que pueda ser utilizada en otros módulos.
 module.exports = { getEvents };
+// -------------------------
+// EJEMPLOS DE USO Y SALIDA
+// -------------------------
+
+/*
+Ejemplo de eventos:
+const events = [
+    { id: 2, name: 'Evento B', time: '2023-01-01' },
+    { id: 1, name: 'Evento A', time: '2023-01-02' },
+];
+
+1. Ordenar por 'id' en orden ascendente:
+   Llamada: sortEvents('id', 'asc')
+   Salida:
+   [
+       { id: 1, name: 'Evento A', time: '2023-01-02' },
+       { id: 2, name: 'Evento B', time: '2023-01-01' }
+   ]
+
+2. Ordenar por 'name' en orden descendente:
+   Llamada: sortEvents('name', 'desc')
+   Salida:
+   [
+       { id: 2, name: 'Evento B', time: '2023-01-01' },
+       { id: 1, name: 'Evento A', time: '2023-01-02' }
+   ]
+
+3. Ordenar por 'time' en orden ascendente:
+   Llamada: sortEvents('time', 'asc')
+   Salida:
+   [
+       { id: 2, name: 'Evento B', time: '2023-01-01' },
+       { id: 1, name: 'Evento A', time: '2023-01-02' }
+   ]
+*/
