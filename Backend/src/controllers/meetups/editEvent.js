@@ -45,23 +45,28 @@ const editEvent = async (req, res) => {
 			return res.status(400).json({ error: error.details[0].message });
 		}
 
-        // Busca el evento por ID
-        const event = getEvents(req.body.id);
+		// Busca el evento por ID
+		const event = getEvents(req.body.id);
 		// const event = events.find((e) => e.id === value.id);
 		if (!event) {
 			return res.status(404).json({ error: 'Evento no encontrado.' });
 		}
 
-        // Busca en req.body y actualiza el evento
-        for (const key in req.body) {
-            if (Object.hasOwnProperty.call(req.body, key)) { // Don't loop through prototype chain
-                event[key] = req.body[key];
-            }
-        }
+		// Busca en req.body y actualiza el evento
+		for (const key in req.body) {
+			if (Object.hasOwnProperty.call(req.body, key)) {
+				// Don't loop through prototype chain
+				event[key] = req.body[key];
+			}
+		}
+
+		if (!isFutureDate(event['time'])) {
+			return res.status(400).json({ error: 'Fecha no válida' });
+		}
 
 		// Reemplaza el evento original con el actualizado en la base de datos
-        updateEvent(req.body.id, event);
-        // events[events.indexOf(event)] = event;
+		updateEvent(req.body.id, event);
+		// events[events.indexOf(event)] = event;
 
 		// Envia una respuesta con el código 201 para indicar que el evento fue creado exitosamente.
 		return res.status(201).json({ message: 'Evento registrado con éxito.' });

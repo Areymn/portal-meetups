@@ -3,11 +3,12 @@
 // -------------------------
 // IMPORTAR DEPENDENCIAS
 // -------------------------
-import { createEvent } from "../../db/events";
+import { createEvent, isFutureDate } from '../../db/events';
 
 // Importa la librería Joi para validar los datos de entrada del usuario.
 // Joi es útil para garantizar que los datos cumplan con un formato específico antes de procesarlos.
 const Joi = import('joi');
+const moment = import('moment');
 
 // -------------------------
 // FUNCIÓN PARA CREAR EVENTOS
@@ -26,13 +27,11 @@ const createEvents = async (req, res) => {
 		// Definir un esquema de validación para los datos del evento.
 		// Esto asegura que los datos proporcionados cumplen con los requisitos esperados.
 		const schema = Joi.object({
-			id: Joi.number().integer().required().strict(), // ID numérica del evento.
 			name: Joi.string().min(3).max(30).required(), // Nombre del evento: entre 3 y 30 caracteres.
 			place: Joi.string().min(3).max(30).required(), // Lugar del evento: entre 3 y 30 caracteres.
 			time: Joi.string().date().required(), // Hora del evento: debe ser una fecha válida.
 			user: Joi.string().min(3).max(30).required(), // Usuario asociado al evento: entre 3 y 30 caracteres.
 			type: Joi.string().min(3).max(30).required(), // Tipo de evento: entre 3 y 30 caracteres.
-			attendees: Joi.array(), // Lista de asistentes (opcional).
 		});
 
 		// Validar los datos de la solicitud utilizando el esquema definido.
@@ -45,6 +44,10 @@ const createEvents = async (req, res) => {
 
 		// Extraer los datos validados del cuerpo de la solicitud.
 		const { id, name, place, time, user, type, attendees } = req.body;
+
+		if (!isFutureDate(time)) {
+			return res.status(400).json({ error: 'Fecha no válida' });
+		}
 
 		// TODO: Generate a unique ID for event
 
