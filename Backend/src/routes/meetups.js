@@ -1,35 +1,36 @@
-'user strict';
+"user strict";
 
-const { isAdmin } = require('../db/events.js');
+const { isAdmin } = require("../db/events.js"); //NO SE USA DE MOMENTO
 
-console.log('Rutas de meetups cargadas correctamente');
+console.log("Rutas de meetups cargadas correctamente");
 
-// Importar dependencias
-const express = import('express');
-const { createEvent } = import('../controllers/meetups/createEvent');
-const { detailEvent } = import('../controllers/meetups/detailEvent');
-const { getEvents } = import('../controllers/meetups/sortEvent');
-const { signupEvent } = import('../controllers/meetups/signupEvent');
-const { editEvent } = import('../controllers/meetups/editEvent');
-const { validateEvent } = import('../controllers/meetups/validateEvent');
-const { authenticateAdmin } = import('../middlewares/authAdmin.js');
-const { authenticateUser } = import('../middlewares/authMiddleware.js');
+// Importar dependencias/// CAMBIADAS POR REQUIRE PARA MANTENER CONSISTENCIA
+const express = require("express");
+const { createEvents } = require("../controllers/meetups/createEvent");
+const { detailEvent } = require("../controllers/meetups/detailEvent");
+const { getEvents } = require("../controllers/meetups/sortEvent");
+const { signupEvent } = require("../controllers/meetups/signupEvent");
+const { editEvent } = require("../controllers/meetups/editEvent");
+const { validateEvent } = require("../controllers/meetups/validateEvent");
+const { authenticateAdmin } = require("../middlewares/authAdmin.js");
+const { authenticateUser } = require("../middlewares/authMiddleware.js");
+
 const router = express.Router(); // Crear una instancia del router de Express
 
 // ------------------------- RUTAS DE MEETUPS -------------------------
 
-// Rutas de meetups
-router.post('/admin/validate', authenticateAdmin, validateEvent);
+// Rutas de meetups// CAMBIADAS LETRAS PORQUE DABA ERROR POR CITAR BIEN LAS PALABRAS
+router.post("/create", authenticateUser, createEvents);
 
-router.post('/create', authenticateUser, createEvent);
+router.post("/detail", detailEvent);
 
-router.post('/signup', authenticateUser, signupEvent);
+router.post("/edit", editEvent);
 
-router.post('/detail', detailEvent);
+router.post("/signup", authenticateUser, signupEvent);
 
-router.post('/edit', editEvent);
+router.post("/admin/validate", authenticateAdmin, validateEvent);
 
-router.post('/', getEvents);
+router.get("/", getEvents);
 
 // ------------------------- EXPORTAR RUTAS -------------------------
 module.exports = router;
