@@ -8,7 +8,8 @@ const jwt = require("jsonwebtoken"); // Importa la librería JWT para verificar 
  * Si es válido, añade los datos del usuario a `req.user`.
  */
 
-const authenticateUser = (req, res, next) => {
+//LO PASE A FUNCION PORUQE SI ME SOLUCIONABA UN ERROR, TENER EN CUENTA POR SI HAY QUE CAMBIARLO DE NUEVO
+function authenticateUser(req, res, next) {
   // Extraer el token del encabezado Authorization
   const token = req.headers["authorization"];
 
@@ -30,6 +31,6 @@ const authenticateUser = (req, res, next) => {
     // Si el token es inválido o expirado, devuelve un error 403 (Prohibido)
     return res.status(403).json({ error: "Token inválido o expirado" });
   }
-};
+}
 
 module.exports = { authenticateUser }; // Exportar la función para usarla en rutas protegidas
