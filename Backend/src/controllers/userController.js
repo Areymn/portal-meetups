@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs"); // Para encriptar y comparar contraseñas
 const Joi = require("joi"); // Para validar los datos recibidos
 const nodemailer = require("nodemailer"); // Para enviar correos (simulado)
 const crypto = require("crypto"); // Para generar códigos únicos (recuperación de contraseña)
+const { v4: uuidv4 } = require("uuid"); // Importar la función para generar IDs únicos
 
 //Clave secreta para JWT, tomada de variables de entorno (log in)
 const JWT_SECRET = process.env.JWT_SECRET || "secret_key"; // Clave secreta para el token
@@ -21,6 +22,7 @@ const recoveryCodes = {}; // Guardar los códigos de recuperación temporalmente
   // Creacion de un usuario temporal con contraseña encriptada
   const hashedPassword = await bcrypt.hash("123456", 10); // Contraseña temporal: 123456
   users.push({
+    id: uuidv4(), // Genera un ID único
     email: "test@example.com",
     username: "testuser",
     password: hashedPassword,
@@ -217,10 +219,47 @@ const changePassword = async (req, res) => {
   }
 };
 
+// ------------------------- ACTUALIZAR PERFIL DE USUARIO-------------------------
+
+const updateUserProfile = async (req, res) => {
+  try {
+    const { id } = req.params; // Obtiene el ID desde los parámetros de la URL
+    console.log("User ID:", id); // Para depuración
+
+    const updates = req.body; // Datos enviados en el cuerpo de la solicitud
+    console.log("Actualizaciones recibidas:", updates); // Verifica el cuerpo recibido
+
+    console.log("Usuarios disponibles:", users);
+    // Validar que el usuario existe
+    const user = users.find((user) => user.id === id);
+    console.log("User encontrado:", user); // Para verificar si el usuario existe
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Actualizar los campos permitidos
+    Object.keys(updates).forEach((key) => {
+      if (["name", "email", "bio"].includes(key)) {
+        user[key] = updates[key];
+      }
+    });
+
+    // Responder con el usuario actualizado
+    res.status(200).json({ message: "Profile updated", user });
+  } catch (error) {
+    console.error("Error interno:", error); // Muestra el error completo en la consola
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message || "Unknown error occurred",
+    });
+  }
+};
+
 // Exportar las funciones
 module.exports = {
   registerUser,
   loginUser,
   passwordRecovery,
   changePassword,
+  updateUserProfile,
 };

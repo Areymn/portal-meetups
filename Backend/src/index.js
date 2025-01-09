@@ -40,6 +40,12 @@ app.get("/", (req, res) => {
 // Ruta que accede a los controladores de los meetups
 app.use("/api/meetups", meetups);
 
+// Imprime todas las rutas registradas
+app._router.stack.forEach((layer) => {
+  if (layer.route) {
+    console.log(layer.route.path);
+  }
+});
 // ------------------------- MANEJO DE ERRORES -------------------------
 
 //Middleware para manejar rutas no encontradas, 404
