@@ -9,6 +9,7 @@ const {
   loginUser,
   passwordRecovery,
   changePassword,
+  updateUserProfile,
 } = require("../controllers/userController");
 const { authenticateUser } = require("../middlewares/authMiddleware.js");
 
@@ -37,6 +38,9 @@ router.get("/protected", authenticateUser, (req, res) => {
     user: req.user, // Información del usuario autenticado
   });
 });
+
+//Ruta para actualizar perfil de usuario
+router.patch("/:id/profile", updateUserProfile);
 
 // ------------------------- EXPORTAR RUTAS -------------------------
 module.exports = router;
