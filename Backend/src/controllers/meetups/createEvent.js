@@ -45,8 +45,8 @@ const createEvents = async (req, res) => {
     // Extraer los datos validados del cuerpo de la solicitud.
     const { id, name, place, time, user, type, attendees } = req.body;
 
-    if (!isFutureDate(time)) {
-      return res.status(400).json({ error: "Fecha no válida" });
+    if (isFutureDate(moment(event.date))) {
+      return res.status(400).send("Event has not occurred yet");
     }
 
     // TODO: Generate a unique ID for event
@@ -58,7 +58,7 @@ const createEvents = async (req, res) => {
     dbCreateEvent(newEvent); //renombrada para poder ser usada, añadi db para evitar conflicto de misma nomenclatura
 
     // Log para depuración: imprime la lista actualizada de eventos.
-    console.log(newEvent);
+    console.log("Lista actualizada de eventos", newEvent);
 
     // Enviar una respuesta con el código 201 para indicar que el evento fue creado exitosamente.
     return res.status(201).json({ message: "Evento registrado con éxito." });

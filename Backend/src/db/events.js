@@ -1,5 +1,22 @@
+"use strict";
 // Para depurar: conexión falsa con la base de datos
-let eventsDB = [];
+const moment = require("moment");
+let eventsDB = [
+  {
+    id: 1,
+    name: "Conferencia de networking",
+    date: "2023-01-07",
+    attendees: 100,
+  },
+  {
+    id: 2,
+    name: "Masterclass ciberseguridad",
+    date: "2023-01-15",
+    attendees: 80,
+  },
+];
+
+console.log("Eventos creados al inicio (pruebas):", eventsDB);
 
 // Crear un evento en la base de datos
 function dbCreateEvent(event) {
@@ -10,17 +27,26 @@ function dbCreateEvent(event) {
 
 // Actualiza un evento buscando su ID
 function updateEvent(id, updatedEvent) {
+  console.log(
+    "Solicitud de actualización por ID recibida:",
+    id,
+    "Con los datos:",
+    updatedEvent
+  );
+  // Para manejar el ID como numero
+  id = Number(id);
   // Primero busca el índice de un evento por ID
-  const index = eventsDB.findIndex(function (event) {
-    return event.id === id;
-  });
+  const index = eventsDB.findIndex((event) => event.id === id);
+  console.log("Indice encontrado:", index);
 
   // Si se encontró, se actualiza
   if (index !== -1) {
     eventsDB[index] = Object.assign({}, eventsDB[index], updatedEvent);
+    console.log("Evento después de la actualización:", eventsDB[index]);
     return eventsDB[index];
   }
 
+  console.log("Evento no encontrado para actualización."); // Si no se encontró, devuelve null
   // Si no se encontró, devuelve null
   return null;
 }
@@ -37,10 +63,15 @@ function deleteEvent(id) {
 
 // Función que busca uno o más eventos por su ID
 function getEvents(id = null) {
+  console.log("Buscando evento con ID:", id);
   if (id !== null) {
-    return eventsDB.find((event) => event.id === id) || null;
+    id = Number(id); // Pasamos  el ID a un número
+    const event = eventsDB.find((event) => event.id === id);
+    console.log("Evento encontrado:", event);
+    return event || null; // Devuelve el evento encontrado o null si no hay coincidencia
   }
-  return eventsDB;
+  console.log("Devolviendo todos los eventos");
+  return eventsDB; // Devuelve todos los eventos si no se especifica un ID
 }
 
 function getSortedEvents(order = "asc", sortBy = "date") {
@@ -60,13 +91,13 @@ function getSortedEvents(order = "asc", sortBy = "date") {
 
 // VALIDATE DATES FUNCTION
 function isFutureDate(dateInput) {
-  const moment = require("moment"); //AÑADIDO POR SI SE UTILIZA
-  const inputDate = dateInput; // Parse the input date
+  const currentDate = moment();
+  const inputDate = moment(dateInput); // Convierte la fecha de entrada a un objeto moment
   if (!inputDate.isValid()) {
     console.error("Invalid date input");
     return false;
   }
-  const currentDate = moment(); // Get the current date and time
+
   return inputDate.isAfter(currentDate); // Check if the input date is after the current date
 }
 
@@ -77,4 +108,5 @@ module.exports = {
   getEvents,
   getSortedEvents,
   isFutureDate,
+  // eventsDB,
 };

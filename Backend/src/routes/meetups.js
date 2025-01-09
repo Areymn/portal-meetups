@@ -14,6 +14,8 @@ const { editEvent } = require("../controllers/meetups/editEvent");
 const { validateEvent } = require("../controllers/meetups/validateEvent");
 const { authenticateAdmin } = require("../middlewares/authAdmin.js");
 const { authenticateUser } = require("../middlewares/authMiddleware.js");
+//IMPORTA RATE
+const { rateEvent } = require("../controllers/meetups/rateEvent");
 
 const router = express.Router(); // Crear una instancia del router de Express
 
@@ -31,6 +33,9 @@ router.post("/signup", authenticateUser, signupEvent);
 router.post("/admin/validate", authenticateAdmin, validateEvent);
 
 router.get("/", getEvents);
+
+//ENDPOINT PARA AÑADIR RATING Y COMENTARIO
+router.post("/:id/rate", rateEvent);
 
 // ------------------------- EXPORTAR RUTAS -------------------------
 module.exports = router;
