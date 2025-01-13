@@ -8,6 +8,8 @@ import userController from "../controllers/userController.js";
 
 import { authenticateUser } from "../middlewares/authMiddleware.js";
 
+import upload from "../middlewares/uploadMiddleware.js";
+
 const router = Router(); // Crear una instancia del router de Express
 
 // ------------------------- RUTAS DE USUARIOS -------------------------
@@ -36,6 +38,15 @@ router.get("/protected", authenticateUser, (req, res) => {
 
 //Ruta para actualizar perfil de usuario
 router.patch("/:id/profile", userController.updateUserProfile);
+
+// Ruta para subir una foto de perfil
+router.post("/profile/upload", upload.single("photo"), (req, res) => {
+  if (req.file) {
+    res.send(`Foto subida con éxito: ${req.file.path}`);
+  } else {
+    res.status(400).send("No se subió ningún archivo.");
+  }
+});
 
 // ------------------------- EXPORTAR RUTAS -------------------------
 export default router;

@@ -26,18 +26,13 @@ app.use(
   cors({
     origin: "*", // Permite todas las solicitudes (puedes restringirlo a dominios específicos)
     methods: ["GET", "POST", "PUT", "DELETE"], // Métodos HTTP permitidos
-    allowedHeaders: ["Content-Type", "Authorization"], // Cabeceras permitidas
+    allowedHeaders: ["Content-Type", "Authorization"], // Headers permitidas
   })
 );
 
 // Middleware para servir archivos estaticos
 
 app.use(express.static("src/static"));
-
-//Comprobacion de que el servidor funciona
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
 
 // ------------------------- RUTAS -------------------------
 // import path from "path";
