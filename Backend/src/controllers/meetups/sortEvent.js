@@ -1,17 +1,18 @@
 "use strict";
 
-const { getSortedEvents } = require("../../db/events");
-const Joi = require("joi");
+import { getSortedEvents } from "../../db/events.js";
+import Joi from "joi";
+const { object, string } = Joi;
 
 // -------------------------
 // FUNCIÓN ESPECÍFICA: ORDENAR EVENTOS
 // -------------------------
 
-const getEvents = async (req, res) => {
+export const getEvents = async (req, res) => {
   try {
-    const schema = Joi.object({
-      sort: Joi.string().min(3).max(3).required(),
-      type: Joi.string().min(3).max(10).required(),
+    const schema = object({
+      sort: string().min(3).max(3).required(),
+      type: string().min(3).max(10).required(),
     });
 
     // Validar los datos de la solicitud utilizando el esquema definido.
@@ -40,7 +41,7 @@ const getEvents = async (req, res) => {
 // -------------------------
 
 // Exportar la función `sortEvents` para que pueda ser utilizada en otros módulos.
-module.exports = { getEvents };
+export default { getEvents };
 // -------------------------
 // EJEMPLOS DE USO Y SALIDA
 // -------------------------

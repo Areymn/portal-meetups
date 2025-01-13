@@ -1,6 +1,7 @@
 "use strict";
 
-const jwt = require("jsonwebtoken"); // Importa la librería JWT para verificar los tokens
+import jwt from "jsonwebtoken"; // Importa la librería JWT para verificar los tokens
+const { verify } = jwt;
 
 /**
  * Middleware de autenticación.
@@ -8,7 +9,7 @@ const jwt = require("jsonwebtoken"); // Importa la librería JWT para verificar 
  * Si es válido, añade los datos del usuario a `req.user`.
  */
 
-const authenticateAdmin = (req, res, next) => {
+export const authenticateAdmin = (req, res, next) => {
   // Extraer el token del encabezado Authorization
   const token = req.headers["authorization"];
 
@@ -19,12 +20,14 @@ const authenticateAdmin = (req, res, next) => {
 
   try {
     // Verificar el token utilizando la clave secreta
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = verify(token, process.env.JWT_SECRET);
 
     // Adjuntar el usuario decodificado del usuario a la solicitud
     req.user = decoded;
     if (!user.isAdmin) {
-        return res.status(403).json({ error: "Este usuario no tiene permisos de administrador" });
+      return res
+        .status(403)
+        .json({ error: "Este usuario no tiene permisos de administrador" });
     }
     // Pasar al siguiente middleware o controlador
     next();
@@ -34,4 +37,4 @@ const authenticateAdmin = (req, res, next) => {
   }
 };
 
-module.exports = { authenticateAdmin }; // Exportar la función para usarla en rutas protegidas
+export default { authenticateAdmin }; // Exportar la función para usarla en rutas protegidas

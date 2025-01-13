@@ -1,11 +1,11 @@
 "use strict";
 
-const jwt = require("jsonwebtoken"); // Para generar y verificar tokens JWT
-const bcrypt = require("bcryptjs"); // Para encriptar y comparar contraseñas
-const Joi = require("joi"); // Para validar los datos recibidos
-const nodemailer = require("nodemailer"); // Para enviar correos (simulado)
-const crypto = require("crypto"); // Para generar códigos únicos (recuperación de contraseña)
-const { v4: uuidv4 } = require("uuid"); // Importar la función para generar IDs únicos
+import jwt from "jsonwebtoken"; // Para generar y verificar tokens JWT
+import bcryptjs from "bcryptjs"; // Para encriptar y comparar contraseñas
+import Joi from "joi"; // Para validar los datos recibidos
+import nodemailer from "nodemailer"; // Para enviar correos (simulado)
+import { randomBytes } from "crypto"; // Para generar códigos únicos (recuperación de contraseña)
+import { v4 as uuidv4 } from "uuid"; // Importar la función para generar IDs únicos
 
 //Clave secreta para JWT, tomada de variables de entorno (log in)
 const JWT_SECRET = process.env.JWT_SECRET || "secret_key"; // Clave secreta para el token
@@ -16,11 +16,17 @@ const users = [];
 // Almacén temporal de códigos de recuperación
 const recoveryCodes = {}; // Guardar los códigos de recuperación temporalmente
 
+const { hash, compare } = bcryptjs;
+
+const { object, string } = Joi;
+
+const { sign, verify } = jwt;
+
 // ------------------------- CREAR USUARIO TEMPORAL -------------------------
 
 (async () => {
   // Creacion de un usuario temporal con contraseña encriptada
-  const hashedPassword = await bcrypt.hash("123456", 10); // Contraseña temporal: 123456
+  const hashedPassword = await hash("123456", 10); // Contraseña temporal: 123456
   users.push({
     id: uuidv4(), // Genera un ID único
     email: "test@example.com",
@@ -42,10 +48,10 @@ const registerUser = async (req, res) => {
     console.log("Solicitud recibida:", req.body); // Log para depuración
 
     // Validar los datos del body con Joi
-    const schema = Joi.object({
-      email: Joi.string().email().required(),
-      username: Joi.string().min(3).max(30).required(),
-      password: Joi.string().min(6).required(),
+    const schema = object({
+      email: string().email().required(),
+      username: string().min(3).max(30).required(),
+      password: string().min(6).required(),
     });
 
     const { error } = schema.validate(req.body);
@@ -62,7 +68,7 @@ const registerUser = async (req, res) => {
     }
 
     //Encriptar la contraseña antes de guardarla
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await hash(password, 10);
 
     //Guardar el usuario en la base de datos simulada
     const newUser = { email, username, password: hashedPassword };
@@ -87,9 +93,9 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     // Validar los datos del body
-    const schema = Joi.object({
-      email: Joi.string().email().required(),
-      password: Joi.string().min(6).required(),
+    const schema = object({
+      email: string().email().required(),
+      password: string().min(6).required(),
     });
 
     const { error } = schema.validate(req.body);
@@ -106,13 +112,13 @@ const loginUser = async (req, res) => {
     }
 
     // Verificar la contraseña encriptada
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Contraseña incorrecta." });
     }
 
     // Generar un token JWT con una expiracion de 1 hora
-    const token = jwt.sign(
+    const token = sign(
       { email: user.email, username: user.username },
       JWT_SECRET,
       { expiresIn: "1h" } // El token expira en 1 hora
@@ -135,8 +141,8 @@ const loginUser = async (req, res) => {
 // Función para recuperación de contraseña
 const passwordRecovery = async (req, res) => {
   // Código existente de recuperación de contraseña
-  const schema = Joi.object({
-    email: Joi.string().email().required(),
+  const schema = object({
+    email: string().email().required(),
   });
 
   const { error } = schema.validate(req.body);
@@ -153,7 +159,7 @@ const passwordRecovery = async (req, res) => {
   }
 
   // Generar y guarda un código único
-  const recoveryCode = crypto.randomBytes(20).toString("hex");
+  const recoveryCode = randomBytes(20).toString("hex");
   recoveryCodes[email] = recoveryCode;
   console.log("Código generado:", recoveryCode); // Log para confirmar
 
@@ -176,10 +182,10 @@ const changePassword = async (req, res) => {
     console.log("Body recibido:", req.body); // Log para depurar
     console.log("Códigos actuales:", recoveryCodes); // Ver los códigos generados
 
-    const schema = Joi.object({
-      email: Joi.string().email().required(),
-      recoveryCode: Joi.string().required(),
-      newPassword: Joi.string().min(6).required(),
+    const schema = object({
+      email: string().email().required(),
+      recoveryCode: string().required(),
+      newPassword: string().min(6).required(),
     });
 
     const { error } = schema.validate(req.body);
@@ -206,7 +212,7 @@ const changePassword = async (req, res) => {
     }
 
     // Encriptar y actualizar la nueva contraseña
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await hash(newPassword, 10);
     user.password = hashedPassword;
 
     // Eliminar el código de recuperación usado
@@ -256,7 +262,7 @@ const updateUserProfile = async (req, res) => {
 };
 
 // Exportar las funciones
-module.exports = {
+export default {
   registerUser,
   loginUser,
   passwordRecovery,

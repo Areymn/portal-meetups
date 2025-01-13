@@ -1,23 +1,23 @@
 "user strict";
 
-const { isAdmin } = require("../db/events.js"); //NO SE USA DE MOMENTO
+// import { isAdmin } from "../db/events.js"; //NO SE USA DE MOMENTO
 
 console.log("Rutas de meetups cargadas correctamente");
 
 // Importar dependencias/// CAMBIADAS POR REQUIRE PARA MANTENER CONSISTENCIA
-const express = require("express");
-const { createEvents } = require("../controllers/meetups/createEvent");
-const { detailEvent } = require("../controllers/meetups/detailEvent");
-const { getEvents } = require("../controllers/meetups/sortEvent");
-const { signupEvent } = require("../controllers/meetups/signupEvent");
-const { editEvent } = require("../controllers/meetups/editEvent");
-const { validateEvent } = require("../controllers/meetups/validateEvent");
-const { authenticateAdmin } = require("../middlewares/authAdmin.js");
-const { authenticateUser } = require("../middlewares/authMiddleware.js");
+import { Router } from "express";
+import { createEvents } from "../controllers/meetups/createEvent.js";
+import { detailEvent } from "../controllers/meetups/detailEvent.js";
+import { getEvents } from "../controllers/meetups/sortEvent.js";
+import { signupEvent } from "../controllers/meetups/signupEvent.js";
+import { editEvent } from "../controllers/meetups/editEvent.js";
+import { validateEvent } from "../controllers/meetups/validateEvent.js";
+import { authenticateAdmin } from "../middlewares/authAdmin.js";
+import { authenticateUser } from "../middlewares/authMiddleware.js";
 //IMPORTA RATE
-const { rateEvent } = require("../controllers/meetups/rateEvent");
+import { rateEvent } from "../controllers/meetups/rateEvent.js";
 
-const router = express.Router(); // Crear una instancia del router de Express
+const router = Router(); // Crear una instancia del router de Express
 
 // ------------------------- RUTAS DE MEETUPS -------------------------
 
@@ -38,4 +38,4 @@ router.get("/", getEvents);
 router.post("/:id/rate", rateEvent);
 
 // ------------------------- EXPORTAR RUTAS -------------------------
-module.exports = router;
+export default router;

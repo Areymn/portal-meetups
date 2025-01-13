@@ -7,10 +7,10 @@
 // Importar la librería Joi para validar los datos de entrada del usuario.
 // Joi es útil para garantizar que los datos cumplan con un formato específico antes de procesarlos.
 // const Joi = import('joi');
-const Joi = require("joi");
-
+import Joi from "joi";
+const { object, number, string, array } = Joi;
 // import { getEvents, updateEvent } from "../../db/events";
-const { getEvents, updateEvent } = require("../../db/events");
+import { getEvents, updateEvent } from "../../db/events.js";
 
 // -------------------------
 // FUNCIÓN PARA CREAR EVENTOS
@@ -22,21 +22,21 @@ const { getEvents, updateEvent } = require("../../db/events");
  * @param {Object} res - La respuesta HTTP que se devolverá al cliente.
  */
 
-const editEvent = async (req, res) => {
+export const editEvent = async (req, res) => {
   try {
     // Log para depuración: imprime los datos enviados en la solicitud.
     console.log("Solicitud recibida:", req.body);
 
     // Definir un esquema de validación para los datos del evento.
     // Esto asegura que los datos proporcionados cumplen con los requisitos esperados.
-    const schema = Joi.object({
-      id: Joi.number().integer().required().strict(), // ID numérica del evento.
-      name: Joi.string().min(3).max(30).required(), // Nombre del evento: entre 3 y 30 caracteres.
-      place: Joi.string().min(3).max(30).required(), // Lugar del evento: entre 3 y 30 caracteres.
-      time: Joi.string().date().required(), // Hora del evento: debe ser una fecha válida.
-      user: Joi.string().min(3).max(30).required(), // Usuario asociado al evento: entre 3 y 30 caracteres.
-      type: Joi.string().min(3).max(30).required(), // Tipo de evento: entre 3 y 30 caracteres.
-      attendees: Joi.array(), // Lista de asistentes (opcional).
+    const schema = object({
+      id: number().integer().required().strict(), // ID numérica del evento.
+      name: string().min(3).max(30).required(), // Nombre del evento: entre 3 y 30 caracteres.
+      place: string().min(3).max(30).required(), // Lugar del evento: entre 3 y 30 caracteres.
+      time: string().date().required(), // Hora del evento: debe ser una fecha válida.
+      user: string().min(3).max(30).required(), // Usuario asociado al evento: entre 3 y 30 caracteres.
+      type: string().min(3).max(30).required(), // Tipo de evento: entre 3 y 30 caracteres.
+      attendees: array(), // Lista de asistentes (opcional).
     });
 
     // Validar los datos de la solicitud utilizando el esquema definido.
@@ -88,4 +88,4 @@ const editEvent = async (req, res) => {
 // -------------------------
 
 // Exportar la función para que pueda ser utilizada en otros módulos.
-module.exports = { editEvent };
+export default { editEvent };

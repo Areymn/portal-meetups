@@ -1,16 +1,18 @@
 "use strict";
 
-const Joi = require("joi");
+import Joi from "joi";
 
-const validateEvent = async (req, res) => {
+const { object, number, boolean } = Joi;
+
+export const validateEvent = async (req, res) => {
   // Log para depuración: imprime los datos enviados en la solicitud.
   console.log("Solicitud recibida:", req.body);
 
   // Definir un esquema de validación para los datos del evento.
   // Esto asegura que los datos proporcionados cumplen con los requisitos esperados.
-  const schema = Joi.object({
-    id: Joi.number().integer().required().strict(), // ID numérica del evento.
-    isValid: Joi.boolean(),
+  const schema = object({
+    id: number().integer().required().strict(), // ID numérica del evento.
+    isValid: boolean(),
   });
 
   // Validar los datos de la solicitud utilizando el esquema definido.
@@ -38,4 +40,4 @@ const validateEvent = async (req, res) => {
   return res.status(201).json({ message: "Evento validado con éxito." });
 };
 
-module.exports = { validateEvent };
+export default { validateEvent };

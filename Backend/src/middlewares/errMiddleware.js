@@ -12,7 +12,7 @@
     res.status(500).json({ error: "Error interno del servidor" });
   });*/
 
-  /**
+/**
  * Middleware para manejar errores de rutas no encontradas (404).
  */
 const notFoundHandler = (req, res, next) => {
@@ -29,7 +29,7 @@ const errorHandler = (err, req, res, next) => {
   });
 };
 
-module.exports = {
+export default {
   notFoundHandler,
   errorHandler,
 };
