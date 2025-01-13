@@ -10,12 +10,14 @@ import cors from "cors"; // Middleware para permitir solicitudes de otros domini
 import path from "path"; // Módulo para manejar rutas de archivos
 import userRoutes from "./routes/userRoutes.js"; // Importar rutas de usuarios
 import meetups from "./routes/meetups.js"; // Importa las rutas de los meetups
+import { logger } from "./middlewares/logger.js";
 
 // ------------------------- INICIALIZAR APP -------------------------
 
 const app = express(); // Crear una instancia de la aplicación Express
 
 // ------------------------- MIDDLEWARES BÁSICOS -------------------------
+app.use(logger); //Archivos estaticos
 
 app.use(json()); // Parsear JSON en el body de las solicitudes
 
@@ -27,6 +29,15 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"], // Cabeceras permitidas
   })
 );
+
+// Middleware para servir archivos estaticos
+
+app.use(express.static("src/static"));
+
+//Comprobacion de que el servidor funciona
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
 
 // ------------------------- RUTAS -------------------------
 // import path from "path";
