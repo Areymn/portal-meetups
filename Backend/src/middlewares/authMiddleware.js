@@ -1,7 +1,7 @@
 "use strict";
 
-const jwt = require("jsonwebtoken"); // Importa la librería JWT para verificar los tokens
-
+import jwt from "jsonwebtoken"; // Importa la librería JWT para verificar los tokens
+const { verify } = jwt;
 /**
  * Middleware de autenticación.
  * Verifica la validez de un token JWT en el encabezado `Authorization`.
@@ -9,7 +9,7 @@ const jwt = require("jsonwebtoken"); // Importa la librería JWT para verificar 
  */
 
 //LO PASE A FUNCION PORUQE SI ME SOLUCIONABA UN ERROR, TENER EN CUENTA POR SI HAY QUE CAMBIARLO DE NUEVO
-function authenticateUser(req, res, next) {
+export const authenticateUser = (req, res, next) => {
   // Extraer el token del encabezado Authorization
   const token = req.headers["authorization"];
 
@@ -20,7 +20,7 @@ function authenticateUser(req, res, next) {
 
   try {
     // Verificar el token utilizando la clave secreta
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = verify(token, process.env.JWT_SECRET);
 
     // Adjuntar el usuario decodificado del usuario a la solicitud
     req.user = decoded;
@@ -31,6 +31,6 @@ function authenticateUser(req, res, next) {
     // Si el token es inválido o expirado, devuelve un error 403 (Prohibido)
     return res.status(403).json({ error: "Token inválido o expirado" });
   }
-}
+};
 
-module.exports = { authenticateUser }; // Exportar la función para usarla en rutas protegidas
+export default { authenticateUser }; // Exportar la función para usarla en rutas protegidas

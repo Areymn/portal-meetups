@@ -1,8 +1,29 @@
-const db = require("../../db/events"); // Asumiendo que `events.js` maneja la "base de datos"
-const { getEvents, isFutureDate, updateEvent } = require("../../db/events");
-const moment = require("moment");
+"use strict";
+console.log("Probando ruta hacia events.js desde rateEvent.js...");
+try {
+  const resolvedPath = new URL("../../db/events.js", import.meta.url);
+  console.log("Ruta resuelta:", resolvedPath.href);
+} catch (error) {
+  console.error("Error al resolver la ruta:", error);
+}
 
-const rateEvent = async (req, res) => {
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+import {
+  dbCreateEvent,
+  updateEvent,
+  deleteEvent,
+  getEvents,
+  getSortedEvents,
+  isFutureDate,
+} from "../../db/events.js";
+import moment from "moment";
+
+export const rateEvent = async (req, res) => {
   const { id } = req.params; // ID del meetup
   const { rating, comment } = req.body; // Rating y comentario enviados por el usuario
 
@@ -51,4 +72,4 @@ const rateEvent = async (req, res) => {
   }
 };
 
-module.exports = { rateEvent };
+export default { rateEvent };

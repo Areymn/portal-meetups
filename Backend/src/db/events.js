@@ -1,6 +1,6 @@
 "use strict";
 // Para depurar: conexión falsa con la base de datos
-const moment = require("moment");
+import moment from "moment";
 let eventsDB = [
   {
     id: 1,
@@ -101,7 +101,11 @@ function isFutureDate(dateInput) {
   return inputDate.isAfter(currentDate); // Check if the input date is after the current date
 }
 
-module.exports = {
+export const isAdmin = (user) => {
+  return user.role === "admin";
+};
+
+export {
   dbCreateEvent,
   updateEvent,
   deleteEvent,

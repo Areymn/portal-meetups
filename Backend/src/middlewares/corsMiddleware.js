@@ -8,7 +8,7 @@
 
 "use strict";
 
-const cors = require("cors"); // Importar la librería cors
+import cors from "cors"; // Importar la librería cors
 
 // Middleware para permitir solicitudes CORS
 const corsMiddleware = cors({
@@ -18,4 +18,4 @@ const corsMiddleware = cors({
 });
 
 // Exportar el middleware
-module.exports = corsMiddleware;
+export default corsMiddleware;

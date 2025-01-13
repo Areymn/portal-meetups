@@ -3,33 +3,28 @@
 console.log("Rutas de usuarios cargadas correctamente");
 
 // Importar dependencias
-const express = require("express");
-const {
-  registerUser,
-  loginUser,
-  passwordRecovery,
-  changePassword,
-  updateUserProfile,
-} = require("../controllers/userController");
-const { authenticateUser } = require("../middlewares/authMiddleware.js");
+import { Router } from "express";
+import userController from "../controllers/userController.js";
 
-const router = express.Router(); // Crear una instancia del router de Express
+import { authenticateUser } from "../middlewares/authMiddleware.js";
+
+const router = Router(); // Crear una instancia del router de Express
 
 // ------------------------- RUTAS DE USUARIOS -------------------------
 
 // Ruta de registro de usuarios
-router.post("/register", registerUser);
+router.post("/register", userController.registerUser);
 
 //Ruta de login de usuarios
-router.post("/login", loginUser);
+router.post("/login", userController.loginUser);
 
 //Ruta recuperacion de contraseña
-router.post("/password-recovery", passwordRecovery);
+router.post("/password-recovery", userController.passwordRecovery);
 
 //Ruta cambio de contraseña
 router.post("/change-password", (req, res) => {
   console.log("Ruta /change-password alcanzada");
-  changePassword(req, res);
+  userController.changePassword(req, res);
 });
 
 router.get("/protected", authenticateUser, (req, res) => {
@@ -40,7 +35,7 @@ router.get("/protected", authenticateUser, (req, res) => {
 });
 
 //Ruta para actualizar perfil de usuario
-router.patch("/:id/profile", updateUserProfile);
+router.patch("/:id/profile", userController.updateUserProfile);
 
 // ------------------------- EXPORTAR RUTAS -------------------------
-module.exports = router;
+export default router;

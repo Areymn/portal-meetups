@@ -6,8 +6,9 @@
 
 // Importar la librería Joi para validar datos de entrada
 // Joi se utiliza para asegurar que los datos proporcionados cumplen con los requisitos establecidos
-const Joi = require("joi");
-const { updateEvent } = require("../../db/events");
+import Joi from "joi";
+const { object, number, string } = Joi;
+import { updateEvent } from "../../db/events.js";
 
 // ===========================================
 // BASE DE DATOS SIMULADA
@@ -22,15 +23,15 @@ const { updateEvent } = require("../../db/events");
  * @param {Object} req - Objeto de solicitud que contiene el id del evento y el usuario.
  * @param {Object} res - Objeto de respuesta para enviar el resultado.
  */
-const signupEvent = async (req, res) => {
+export const signupEvent = async (req, res) => {
   try {
     // Log para depuración: imprime los datos recibidos en la solicitud
     console.log("Solicitud recibida:", req.body);
 
     // Definir un esquema de validación para los datos del evento
-    const schema = Joi.object({
-      id: Joi.number().integer().required().strict(), // ID del evento en formato numérico
-      user: Joi.string().min(3).max(30).required(), // Nombre del usuario (3-30 caracteres)
+    const schema = object({
+      id: number().integer().required().strict(), // ID del evento en formato numérico
+      user: string().min(3).max(30).required(), // Nombre del usuario (3-30 caracteres)
     });
 
     // Validar los datos del cuerpo de la solicitud contra el esquema definido
@@ -73,9 +74,9 @@ const cancelSignup = (req, res) => {
     console.log("Solicitud recibida:", req.body);
 
     // Definir un esquema de validación para los datos del evento
-    const schema = Joi.object({
-      id: Joi.number().integer().required(), // ID del evento en formato numérico
-      user: Joi.string().min(3).max(30).required(), // Nombre del usuario (3-30 caracteres)
+    const schema = object({
+      id: number().integer().required(), // ID del evento en formato numérico
+      user: string().min(3).max(30).required(), // Nombre del usuario (3-30 caracteres)
     });
 
     // Validar los datos del cuerpo de la solicitud contra el esquema definido
@@ -127,7 +128,7 @@ const cancelSignup = (req, res) => {
 // ===========================================
 
 // Exportar las funciones para que puedan ser utilizadas en otros módulos
-module.exports = { signupEvent, cancelSignup };
+export default { signupEvent, cancelSignup };
 
 // -------------------------------------------
 // EJEMPLOS DE USO Y SALIDA

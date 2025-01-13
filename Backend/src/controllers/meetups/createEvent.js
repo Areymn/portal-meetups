@@ -3,12 +3,20 @@
 // -------------------------
 // IMPORTAR DEPENDENCIAS
 // -------------------------
-const { dbCreateEvent, isFutureDate } = require("../../db/events");
+import {
+  dbCreateEvent,
+  updateEvent,
+  deleteEvent,
+  getEvents,
+  getSortedEvents,
+  isFutureDate,
+} from "../../db/events.js";
 
 // Importa la librería Joi para validar los datos de entrada del usuario.
 // Joi es útil para garantizar que los datos cumplan con un formato específico antes de procesarlos.
-const Joi = require("joi");
-const moment = require("moment");
+import Joi from "joi";
+const { object, string } = Joi;
+import moment from "moment";
 
 // -------------------------
 // FUNCIÓN PARA CREAR EVENTOS
@@ -19,19 +27,19 @@ const moment = require("moment");
  * @param {Object} req - La solicitud HTTP que contiene los datos del evento en `req.body`.
  * @param {Object} res - La respuesta HTTP que se devolverá al cliente.
  */
-const createEvents = async (req, res) => {
+export const createEvents = async (req, res) => {
   try {
     // Log para depuración: imprime los datos enviados en la solicitud.
     console.log("Solicitud recibida:", req.body);
 
     // Definir un esquema de validación para los datos del evento.
     // Esto asegura que los datos proporcionados cumplen con los requisitos esperados.
-    const schema = Joi.object({
-      name: Joi.string().min(3).max(30).required(), // Nombre del evento: entre 3 y 30 caracteres.
-      place: Joi.string().min(3).max(30).required(), // Lugar del evento: entre 3 y 30 caracteres.
-      time: Joi.string().date().required(), // Hora del evento: debe ser una fecha válida.
-      user: Joi.string().min(3).max(30).required(), // Usuario asociado al evento: entre 3 y 30 caracteres.
-      type: Joi.string().min(3).max(30).required(), // Tipo de evento: entre 3 y 30 caracteres.
+    const schema = object({
+      name: string().min(3).max(30).required(), // Nombre del evento: entre 3 y 30 caracteres.
+      place: string().min(3).max(30).required(), // Lugar del evento: entre 3 y 30 caracteres.
+      time: string().date().required(), // Hora del evento: debe ser una fecha válida.
+      user: string().min(3).max(30).required(), // Usuario asociado al evento: entre 3 y 30 caracteres.
+      type: string().min(3).max(30).required(), // Tipo de evento: entre 3 y 30 caracteres.
     });
 
     // Validar los datos de la solicitud utilizando el esquema definido.
@@ -45,7 +53,7 @@ const createEvents = async (req, res) => {
     // Extraer los datos validados del cuerpo de la solicitud.
     const { id, name, place, time, user, type, attendees } = req.body;
 
-    if (isFutureDate(moment(event.date))) {
+    if (events.isFutureDate(moment(time))) {
       return res.status(400).send("Event has not occurred yet");
     }
 
@@ -55,7 +63,7 @@ const createEvents = async (req, res) => {
     const newEvent = { id, name, place, time, user, type, attendees };
 
     // Agregar el nuevo evento al array `events`.
-    dbCreateEvent(newEvent); //renombrada para poder ser usada, añadi db para evitar conflicto de misma nomenclatura
+    events.dbCreateEvent(newEvent); //renombrada para poder ser usada, añadi db para evitar conflicto de misma nomenclatura
 
     // Log para depuración: imprime la lista actualizada de eventos.
     console.log("Lista actualizada de eventos", newEvent);
@@ -78,4 +86,4 @@ const createEvents = async (req, res) => {
 // -------------------------
 
 // Exportar la función `createEvents` para que pueda ser utilizada en otros módulos.
-module.exports = { createEvents };
+export default { createEvents };

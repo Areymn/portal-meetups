@@ -3,7 +3,8 @@
 // -------------------------
 // IMPORTAR DEPENDENCIAS
 // -------------------------
-const { getEvents } = require("../../db/events");
+
+import { getEvents } from "../../db/events.js";
 
 // -------------------------
 // FUNCIÓN PARA VER LOS DETALLES DE UN EVENTO
@@ -14,7 +15,7 @@ const { getEvents } = require("../../db/events");
  * @param {Object} req - La solicitud HTTP que contiene el ID del evento como parámetro o en `req.body`.
  * @param {Object} res - La respuesta HTTP que se enviará al cliente.
  */
-const detailEvent = (req, res) => {
+export const detailEvent = (req, res) => {
   try {
     // Log para depuración: imprime los datos recibidos en la solicitud.
     console.log("Solicitud recibida:", req.query);
@@ -61,4 +62,4 @@ const detailEvent = (req, res) => {
 // -------------------------
 
 // Exportar la función `getEventDetails` para que pueda ser utilizada en otros módulos.
-module.exports = { detailEvent }; // cambiado para llamar correctamente a la funcion
+export default { detailEvent };

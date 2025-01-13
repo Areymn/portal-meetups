@@ -1,14 +1,15 @@
 "use strict";
 
 // Cargar variables de entorno desde el archivo .env
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 
-const express = require("express"); // Framework de servidor web
-const bodyParser = require("body-parser"); // Middleware para parsear cuerpos JSON
-const cors = require("cors"); // Middleware para permitir solicitudes de otros dominios
-const path = require("path"); // Módulo para manejar rutas de archivos
-const userRoutes = require("./routes/userRoutes"); // Importar rutas de usuarios
-const meetups = require("./routes/meetups"); // Importa las rutas de los meetups
+import express, { json } from "express"; // Framework de servidor web
+import bodyParser from "body-parser"; // Middleware para parsear cuerpos JSON
+import cors from "cors"; // Middleware para permitir solicitudes de otros dominios
+import path from "path"; // Módulo para manejar rutas de archivos
+import userRoutes from "./routes/userRoutes.js"; // Importar rutas de usuarios
+import meetups from "./routes/meetups.js"; // Importa las rutas de los meetups
 
 // ------------------------- INICIALIZAR APP -------------------------
 
@@ -16,7 +17,7 @@ const app = express(); // Crear una instancia de la aplicación Express
 
 // ------------------------- MIDDLEWARES BÁSICOS -------------------------
 
-app.use(express.json()); // Parsear JSON en el body de las solicitudes
+app.use(json()); // Parsear JSON en el body de las solicitudes
 
 // Configurar CORS para permitir solicitudes desde cualquier origen
 app.use(
@@ -28,6 +29,20 @@ app.use(
 );
 
 // ------------------------- RUTAS -------------------------
+// import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Intenta resolver la ruta del archivo `events.js`
+console.log("Probando ruta hacia events.js...");
+try {
+  const resolvedPath = path.resolve(__dirname, "./db/events.js");
+  console.log("Ruta resuelta:", resolvedPath);
+} catch (error) {
+  console.error("Error al resolver ruta:", error);
+}
 
 // Rutas de usuarios (todas las rutas que empiezan con /api/users)
 app.use("/api/users", userRoutes);
