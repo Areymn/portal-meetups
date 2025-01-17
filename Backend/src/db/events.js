@@ -101,9 +101,9 @@ function isFutureDate(dateInput) {
   return inputDate.isAfter(currentDate); // Check if the input date is after the current date
 }
 
-export const isAdmin = (user) => {
-  return user.role === "admin";
-};
+// export const isAdmin = (user) => {
+//   return user.role === "admin";
+// };
 
 export {
   dbCreateEvent,

@@ -1,0 +1,57 @@
+console.log("Holaaaaa");
+// Importamos las dependencias
+import mysql from "mysql2/promise";
+import dotenv from "dotenv";
+// Importamos las variables de entorno.
+
+dotenv.config(); // Carga las variables de entorno desde .env
+
+console.log("MYSQL_HOST:", process.env.MYSQL_HOST);
+console.log("MYSQL_USER:", process.env.MYSQL_USER);
+console.log("MYSQL_PASS:", process.env.MYSQL_PASS);
+console.log("MYSQL_DB:", process.env.MYSQL_DB);
+
+// Variable que almacenará un pool de conexiones.
+let pool;
+
+// Función que retorna un pool de conexiones.
+const getPool = async () => {
+  try {
+    // Si no hay un pool de conexiones, es decir, si la variable pool contiene un
+    // valor considerado falso, creamos el pool
+    if (!pool) {
+      // Creamos un pool temporal con el único fin de crear la base de datos.
+      const tempPool = await mysql.createPool({
+        host: process.env.MYSQL_HOST,
+        user: process.env.MYSQL_USER,
+        password: process.env.MYSQL_PASS,
+        // database: process.env.MYSQL_DB,
+      });
+
+      // Ahora que tenemos un pool temporal creamos la base de datos si no existe.
+      await tempPool.query(
+        `CREATE DATABASE IF NOT EXISTS ${process.env.MYSQL_DB}`
+      );
+      tempPool.end(); // Cerramos el pool temporal
+
+      // Creamos el pool de conexiones final. Este método NO genera la base de datos en
+      // caso de no existir, por ese motivo la hemos creado en el paso anterior.
+      pool = await mysql.createPool({
+        host: process.env.MYSQL_HOST,
+        user: process.env.MYSQL_USER,
+        password: process.env.MYSQL_PASS,
+        database: process.env.MYSQL_DB,
+        timezone: "Z",
+      });
+    }
+
+    // Retornamos el pool.
+    return pool;
+  } catch (err) {
+    console.error("Error al crear o utilizar el pool de conexiones:", err);
+    throw err; // Re-lanzamos el error para manejarlo más arriba si es necesario
+  }
+};
+
+// Exportamos la función anterior.
+export default getPool;

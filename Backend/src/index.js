@@ -5,6 +5,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express, { json } from "express"; // Framework de servidor web
+import { PORT } from "./env.js"; // Obtenemos las variables de entorno
+import initDB from "./db/initDB.js";
 import bodyParser from "body-parser"; // Middleware para parsear cuerpos JSON
 import cors from "cors"; // Middleware para permitir solicitudes de otros dominios
 import path from "path"; // Módulo para manejar rutas de archivos
@@ -83,7 +85,9 @@ app.use((err, req, res, next) => {
 // ------------------------- CONFIGURAR PUERTO Y LEVANTAR SERVIDOR -------------------------
 
 // Obtener el puerto desde variables de entorno o usar 5000 por defecto
-const PORT = process.env.PORT || 5000;
+// const PORT = process.env.PORT || 5000;// NO REDECLARAR PORQUE YA LO IMPORTA .env.js de .env
+
+initDB(); // Asegura que la base de datos está lista antes de aceptar solicitudes.
 
 // Iniciar el servidor en el puerto especificado
 app.listen(PORT, () => {

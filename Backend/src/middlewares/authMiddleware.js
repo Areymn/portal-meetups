@@ -6,9 +6,9 @@ const { verify } = jwt;
  * Middleware de autenticación.
  * Verifica la validez de un token JWT en el encabezado `Authorization`.
  * Si es válido, añade los datos del usuario a `req.user`.
+ * Devuelve un error si el token no existe, es inválido o está expirado.
  */
 
-//LO PASE A FUNCION PORUQE SI ME SOLUCIONABA UN ERROR, TENER EN CUENTA POR SI HAY QUE CAMBIARLO DE NUEVO
 export const authenticateUser = (req, res, next) => {
   // Extraer el token del encabezado Authorization
   const token = req.headers["authorization"];

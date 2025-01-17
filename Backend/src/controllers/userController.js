@@ -1,7 +1,7 @@
 "use strict";
 
-import jwt from "jsonwebtoken"; // Para generar y verificar tokens JWT
 import bcryptjs from "bcryptjs"; // Para encriptar y comparar contraseñas
+import jwt from "jsonwebtoken"; // Para generar y verificar tokens JWT
 import Joi from "joi"; // Para validar los datos recibidos
 import nodemailer from "nodemailer"; // Para enviar correos (simulado)
 import { randomBytes } from "crypto"; // Para generar códigos únicos (recuperación de contraseña)
