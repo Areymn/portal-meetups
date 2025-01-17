@@ -29,6 +29,7 @@ router.post("/change-password", (req, res) => {
   userController.changePassword(req, res);
 });
 
+// Ruta protegida (para probar autenticación)
 router.get("/protected", authenticateUser, (req, res) => {
   res.status(200).json({
     message: "Ruta protegida accedida con éxito",
