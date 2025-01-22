@@ -6,6 +6,10 @@ import Joi from "joi"; // Para validar los datos recibidos
 import nodemailer from "nodemailer"; // Para enviar correos (simulado)
 import { randomBytes } from "crypto"; // Para generar códigos únicos (recuperación de contraseña)
 import { v4 as uuidv4 } from "uuid"; // Importar la función para generar IDs únicos
+import getPool from "../db/getPool.js";
+import crypto from "crypto"; // Para generar códigos únicos
+
+import { addMinutes, format } from "date-fns";
 
 //Clave secreta para JWT, tomada de variables de entorno (log in)
 const JWT_SECRET = process.env.JWT_SECRET || "secret_key"; // Clave secreta para el token
@@ -14,13 +18,15 @@ const JWT_SECRET = process.env.JWT_SECRET || "secret_key"; // Clave secreta para
 const users = [];
 
 // Almacén temporal de códigos de recuperación
-const recoveryCodes = {}; // Guardar los códigos de recuperación temporalmente
+const recoveryCodes = {};
 
 const { hash, compare } = bcryptjs;
 
 const { object, string } = Joi;
 
 const { sign, verify } = jwt;
+
+const timeZone = "Europe/Madrid"; // Ajusta a la zona horaria que necesitas
 
 // ------------------------- CREAR USUARIO TEMPORAL -------------------------
 
@@ -48,33 +54,53 @@ const registerUser = async (req, res) => {
     console.log("Solicitud recibida:", req.body); // Log para depuración
 
     // Validar los datos del body con Joi
-    const schema = object({
-      email: string().email().required(),
-      username: string().min(3).max(30).required(),
-      password: string().min(6).required(),
+    const schema = Joi.object({
+      username: Joi.string().min(3).max(30).required(),
+      email: Joi.string().email().required(),
+      password: Joi.string().min(6).required(),
+      name: Joi.string().required(),
+      last_name: Joi.string().required(),
+      avatar: Joi.string(), // Opcional
+      rol: Joi.string().valid("admin", "user").default("user"),
     });
 
-    const { error } = schema.validate(req.body);
-    if (error) {
-      return res.status(400).json({ error: error.details[0].message });
+    const validationResult = schema.validate(req.body);
+    if (validationResult.error) {
+      return res
+        .status(400)
+        .json({ error: validationResult.error.details[0].message });
     }
 
-    const { email, username, password } = req.body;
+    const { email, username, password, name, last_name, avatar, rol } =
+      validationResult.value;
 
-    //Verificar si el usuario ya existe
-    const userExists = users.find((user) => user.email === email);
-    if (userExists) {
-      return res.status(400).json({ error: "El email ya esta registrado." });
+    // //Verificar si el usuario ya existe
+    // const userExists = users.find((user) => user.email === email);
+    // if (userExists) {
+    //   return res.status(400).json({ error: "El email ya esta registrado." });
+    // }
+
+    const pool = await getPool();
+    // Verificar si el usuario ya existe
+    const [existingUser] = await pool.query(
+      "SELECT * FROM users WHERE email = ?",
+      [email]
+    );
+    if (existingUser.length > 0) {
+      return res.status(400).json({ error: "El email ya está registrado." });
     }
 
     //Encriptar la contraseña antes de guardarla
     const hashedPassword = await hash(password, 10);
+    // //Guardar el usuario en la base de datos simulada
+    // const newUser = { email, username, password: hashedPassword };
+    // users.push(newUser);
 
-    //Guardar el usuario en la base de datos simulada
-    const newUser = { email, username, password: hashedPassword };
-    users.push(newUser);
-
-    //Responder con éxito
+    // Insertar el nuevo usuario en la base de datos
+    await pool.query(
+      "INSERT INTO users (username, email, password, name, last_name, avatar, rol) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [username, email, hashedPassword, name, last_name, avatar, rol]
+    );
     res.status(201).json({ message: "Usuario registrado con éxito." });
   } catch (err) {
     console.error("Error en el controlador:", err.message);
@@ -93,24 +119,31 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     // Validar los datos del body
-    const schema = object({
-      email: string().email().required(),
-      password: string().min(6).required(),
+    const schema = Joi.object({
+      email: Joi.string().email().required(),
+      password: Joi.string().min(6).required(),
     });
 
-    const { error } = schema.validate(req.body);
+    const { error, value } = schema.validate(req.body);
     if (error) {
       return res.status(400).json({ error: error.details[0].message });
     }
 
-    const { email, password } = req.body;
+    const { email, password } = value;
+    const pool = await getPool();
+    // // Buscar el usuario en la base de datos simulada
+    // const user = users.find((u) => u.email === email);
+    // if (!user) {
+    //   return res.status(400).json({ error: "El usuario no existe." });
+    // }
+    const [users] = await pool.query("SELECT * FROM users WHERE email = ?", [
+      email,
+    ]);
 
-    // Buscar el usuario en la base de datos simulada
-    const user = users.find((u) => u.email === email);
-    if (!user) {
+    if (users.length === 0) {
       return res.status(400).json({ error: "El usuario no existe." });
     }
-
+    const user = users[0];
     // Verificar la contraseña encriptada
     const isPasswordValid = await compare(password, user.password);
     if (!isPasswordValid) {
@@ -125,9 +158,107 @@ const loginUser = async (req, res) => {
     );
 
     // Responder con el token
-    res.status(200).json({ message: "Login exitoso", token });
+    res.status(200).json({
+      message: "Login exitoso",
+      token,
+      username: user.username, // Incluye el nombre de usuario
+    });
   } catch (err) {
     console.error("Error en loginUser:", err.message);
+    res.status(500).json({ error: "Error interno del servidor." });
+  }
+};
+
+// -------------- GENERAR CODIGO DE VALIDACION DE USUARIOS ---------------
+
+export const generateValidationCode = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const pool = await getPool();
+
+    // Verificar si el usuario existe
+    const [users] = await pool.query("SELECT id FROM users WHERE email = ?", [
+      email,
+    ]);
+
+    if (users.length === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado." });
+    }
+
+    const userId = users[0].id;
+
+    // Generar un código único
+    const code = crypto.randomBytes(3).toString("hex").toUpperCase();
+
+    // Obtener la hora actual de MySQL y calcular la expiración
+    const [result] = await pool.query("SELECT NOW() as now");
+    const currentMySQLTime = result[0].now;
+
+    // Añadir minutos para la expiración
+    const expiresAt = addMinutes(new Date(currentMySQLTime), 15);
+    const formattedExpiresAt = format(expiresAt, "yyyy-MM-dd HH:mm:ss");
+    console.log(`Fecha de expiración formateada: ${formattedExpiresAt}`);
+
+    console.log(
+      `Código generado: ${code}, para usuario: ${email}, expira: ${formattedExpiresAt}`
+    );
+
+    // Insertar el código en la tabla `user_validation`
+    await pool.query(
+      "INSERT INTO user_validation (user_id, validation_code, expires_at) VALUES (?, ?, ?)",
+      [userId, code, formattedExpiresAt]
+    );
+
+    console.log(`Código de validación para ${email}: ${code}`);
+    res
+      .status(200)
+      .json({ message: "Código de validación generado y enviado." });
+  } catch (error) {
+    console.error("Error al generar el código de validación:", error.message);
+    res.status(500).json({ error: "Error interno del servidor." });
+  }
+};
+
+//-------------------------- VALIDACION DEL CODIGO------------------------
+
+export const validateUserCode = async (req, res) => {
+  const { email, code } = req.body;
+
+  try {
+    const pool = await getPool();
+
+    // Verificar si el código es válido
+    const [validationData] = await pool.query(
+      `SELECT uv.id FROM user_validation uv
+       JOIN users u ON uv.user_id = u.id
+       WHERE u.email = ? AND uv.validation_code = ? AND uv.expires_at > NOW()`,
+      [email, code]
+    );
+
+    if (validationData.length === 0) {
+      console.log(
+        `Fallido: El código ${code} para ${email} es incorrecto o ha expirado.`
+      );
+      return res
+        .status(400)
+        .json({ error: "Código de validación incorrecto o expirado." });
+    }
+
+    // Detalles adicionales sobre la validación exitosa
+    console.log(
+      `Exitoso: El código ${code} para ${email} es válido. Expira tras el uso`
+    );
+
+    // Eliminar el código usado
+    await pool.query("DELETE FROM user_validation WHERE id = ?", [
+      validationData[0].id,
+      console.log("Codigo de validacion eliminado tras haber sido usado"),
+    ]);
+
+    res.status(200).json({ message: "Usuario validado con éxito." });
+  } catch (error) {
+    console.error("Error al validar el código:", error.message);
     res.status(500).json({ error: "Error interno del servidor." });
   }
 };
