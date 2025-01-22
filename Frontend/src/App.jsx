@@ -8,7 +8,13 @@ import {
 import MeetupForm from "./components/MeetupForm"; // Componente para crear/modificar meetups
 import LoginForm from "./components/LoginForm"; // Componente para iniciar sesión
 import { useUserContext } from "./context/UserContext"; // Importando el contexto de usuario
+import UserValidationForm from "./components/UserValidationForm";
 import "./App.css"; // Importa tu archivo de estilos si es necesario
+
+// Componente para proteger rutas
+const ProtectedRoute = ({ user, children }) => {
+  return user ? children : <Navigate to="/login" replace />;
+};
 
 const App = () => {
   const { user } = useUserContext(); // Obtener el usuario del contexto
@@ -22,13 +28,20 @@ const App = () => {
   return (
     <Router>
       <div className="App">
-        <h1>{user ? "Crear/Modificar Meetup" : "Iniciar Sesión"}</h1>
         <Routes>
-          {user ? (
-            <Route
-              path="/"
-              element={
+          {/* Ruta para iniciar sesión */}
+          <Route path="/login" element={<LoginForm />} />
+
+          {/* Ruta para validación de usuario */}
+          <Route path="/validate-user" element={<UserValidationForm />} />
+
+          {/* Ruta para meetups, protegida, accesible solo si el usuario está autenticado */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute user={user}>
                 <>
+                  <h1>Crear/Modificar Meetup</h1>
                   <MeetupForm onSubmit={handleMeetupSubmit} />
                   {meetups.map((meetup, index) => (
                     <div key={index}>
@@ -38,13 +51,12 @@ const App = () => {
                     </div>
                   ))}
                 </>
-              }
-            />
-          ) : (
-            <Route path="/" element={<LoginForm />} />
-          )}
-          {/* Redirige a la raíz si se intenta acceder a una ruta no definida */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Captura cualquier ruta no definida y redirige adecuadamente */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </div>
     </Router>
