@@ -7,17 +7,11 @@ import {
 } from "react-router-dom";
 import MeetupForm from "./components/MeetupForm"; // Componente para crear/modificar meetups
 import LoginForm from "./components/LoginForm"; // Componente para iniciar sesión
-import { useUserContext } from "./context/UserContext"; // Importando el contexto de usuario
-import UserValidationForm from "./components/UserValidationForm";
-import "./App.css"; // Importa tu archivo de estilos si es necesario
-
-// Componente para proteger rutas
-const ProtectedRoute = ({ user, children }) => {
-  return user ? children : <Navigate to="/login" replace />;
-};
+import UserValidationForm from "./components/UserValidationForm"; // Componente de validación de usuario
+import ProtectedRoute from "./components/ProtectedRoute"; // Nuevo componente para proteger rutas
+import "./App.css"; // Importa tus estilos si es necesario
 
 const App = () => {
-  const { user } = useUserContext(); // Obtener el usuario del contexto
   const [meetups, setMeetups] = useState([]);
 
   const handleMeetupSubmit = (meetupData) => {
@@ -35,11 +29,11 @@ const App = () => {
           {/* Ruta para validación de usuario */}
           <Route path="/validate-user" element={<UserValidationForm />} />
 
-          {/* Ruta para meetups, protegida, accesible solo si el usuario está autenticado */}
+          {/* Ruta para meetups, protegida */}
           <Route
             path="/"
             element={
-              <ProtectedRoute user={user}>
+              <ProtectedRoute>
                 <>
                   <h1>Crear/Modificar Meetup</h1>
                   <MeetupForm onSubmit={handleMeetupSubmit} />
@@ -55,7 +49,7 @@ const App = () => {
             }
           />
 
-          {/* Captura cualquier ruta no definida y redirige adecuadamente */}
+          {/* Captura cualquier ruta no definida y redirige al login */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </div>

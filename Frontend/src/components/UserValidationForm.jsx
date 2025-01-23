@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import "../UserValidationForm.css";
+import { useUserContext } from "../context/UserContext";
 
 const UserValidationForm = () => {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [message, setMessage] = useState(""); // Para mostrar mensajes al usuario
+  const { token } = useUserContext(); // Obtener el token desde el contexto
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -17,6 +19,7 @@ const UserValidationForm = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Enviar el token como header
           },
           body: JSON.stringify({ email, code }), // Datos enviados al backend
         }

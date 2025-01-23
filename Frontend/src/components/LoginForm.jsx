@@ -27,6 +27,7 @@ const LoginForm = () => {
 
       if (response.ok) {
         // Guardamos el token en el localStorage
+        login({ username: data.username }, data.token); // Aquí se guarda en el contexto
         localStorage.setItem("token", data.token);
         console.log("Token recibido:", data.token);
 
