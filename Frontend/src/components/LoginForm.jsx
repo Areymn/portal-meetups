@@ -6,7 +6,7 @@ import { useUserContext } from "../context/UserContext";
 
 const LoginForm = () => {
   const { login } = useUserContext(); // Obtenemos la función login del contexto
-  const [username, setUsername] = useState(""); // Estado para el nombre de usuario
+  const [email, setEmail] = useState(""); // Estado para el correo electrónico
   const [password, setPassword] = useState(""); // Estado para la contraseña
   const navigate = useNavigate(); // Hook para redirigir
 
@@ -20,22 +20,17 @@ const LoginForm = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: username, password }), // Nota: `username` usado como email
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // Guardamos el token en el localStorage
-        login({ username: data.username }, data.token); // Aquí se guarda en el contexto
-        localStorage.setItem("token", data.token);
-        console.log("Token recibido:", data.token);
-
-        // Verifica si el backend envía el campo username
-        const loggedInUser = data.username || username;
-
-        // Guardamos el usuario y el token en el contexto
+        // Guardamos el token en el contexto
+        const loggedInUser = data.username || email; // Nombre de usuario recibido del backend o email usado
         login({ username: loggedInUser }, data.token);
+
+        console.log("Token recibido:", data.token);
         console.log("Usuario logueado:", loggedInUser);
 
         alert("Inicio de sesión exitoso");
@@ -54,11 +49,11 @@ const LoginForm = () => {
   return (
     <form onSubmit={handleSubmit}>
       <div>
-        <label>Usuario</label>
+        <label>Correo Electrónico</label>
         <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
       </div>
