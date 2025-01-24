@@ -5,7 +5,10 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import "./styles.css";
 import MeetupForm from "./components/MeetupForm"; // Componente para crear/modificar meetups
+
+import RegisterForm from "./components/RegisterForm";
 import LoginForm from "./components/LoginForm"; // Componente para iniciar sesión
 import UserValidationForm from "./components/UserValidationForm"; // Componente de validación de usuario
 import ProtectedRoute from "./components/ProtectedRoute"; // Nuevo componente para proteger rutas
@@ -23,6 +26,9 @@ const App = () => {
     <Router>
       <div className="App">
         <Routes>
+          {/* Ruta para iniciar sesión */}
+          <Route path="/register" element={<RegisterForm />} />
+
           {/* Ruta para iniciar sesión */}
           <Route path="/login" element={<LoginForm />} />
 

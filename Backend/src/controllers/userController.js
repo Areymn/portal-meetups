@@ -271,35 +271,73 @@ export const validateUserCode = async (req, res) => {
 
 // Función para recuperación de contraseña
 const passwordRecovery = async (req, res) => {
+  // const { object, string } = Joi;
   // Código existente de recuperación de contraseña
-  const schema = object({
-    email: string().email().required(),
+  const schema = Joi.object({
+    email: Joi.string().email().required(),
   });
 
-  const { error } = schema.validate(req.body);
+  const { error, value } = schema.validate(req.body);
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
   }
 
-  const { email } = req.body;
+  const { email } = value;
+  const pool = await getPool();
 
   // Verificar si el usuario existe
-  const user = users.find((u) => u.email === email);
-  if (!user) {
+  const [users] = await pool.query("SELECT id FROM users WHERE email = ?", [
+    email,
+  ]);
+
+  if (users.length === 0) {
     return res.status(404).json({ error: "El email no está registrado." });
   }
 
+  const userId = users[0].id;
   // Generar y guarda un código único
   const recoveryCode = randomBytes(20).toString("hex");
-  recoveryCodes[email] = recoveryCode;
+  await pool.query(
+    "INSERT INTO password_recovery (user_id, recovery_code, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 1 HOUR))",
+    [userId, recoveryCode]
+  );
+
   console.log("Código generado:", recoveryCode); // Log para confirmar
 
-  // Enviar correo (simulado)
-  console.log(`Código de recuperación para ${email}: ${recoveryCode}`);
+  //Logica para enviar correos.
+  // Crear una cuenta de prueba Ethereal automáticamente y enviar el correo
+  let testAccount = await nodemailer.createTestAccount();
 
-  res
-    .status(200)
-    .json({ message: "Código de recuperación enviado por correo." });
+  let transporter = nodemailer.createTransport({
+    host: testAccount.smtp.host,
+    port: testAccount.smtp.port,
+    secure: testAccount.smtp.secure,
+    auth: {
+      user: testAccount.user,
+      pass: testAccount.pass,
+    },
+  });
+
+  const mailOptions = {
+    from: '"Soporte Técnico" <support@example.com>', // dirección del remitente
+    to: email, // lista de destinatarios
+    subject: "Código de Recuperación de Contraseña", // Línea de asunto
+    text: `Tu código de recuperación es: ${recoveryCode}`, // cuerpo del texto plano
+    html: `<b>Tu código de recuperación es:</b> ${recoveryCode}`, // cuerpo del HTML
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+      return res.status(500).json({ error: "Error al enviar el correo." });
+    } else {
+      console.log("Correo enviado: " + nodemailer.getTestMessageUrl(info));
+      res.status(200).json({
+        message: "Código de recuperación enviado por correo.",
+        previewUrl: nodemailer.getTestMessageUrl(info),
+      });
+    }
+  });
 };
 
 // ------------------------- CAMBIO DE CONTRASEÑA -------------------------
@@ -311,43 +349,45 @@ const passwordRecovery = async (req, res) => {
 const changePassword = async (req, res) => {
   try {
     console.log("Body recibido:", req.body); // Log para depurar
-    console.log("Códigos actuales:", recoveryCodes); // Ver los códigos generados
 
-    const schema = object({
-      email: string().email().required(),
-      recoveryCode: string().required(),
-      newPassword: string().min(6).required(),
+    const schema = Joi.object({
+      email: Joi.string().email().required(),
+      recoveryCode: Joi.string().required(),
+      newPassword: Joi.string().min(6).required(),
     });
 
-    const { error } = schema.validate(req.body);
+    const { error, value } = schema.validate(req.body);
     if (error) {
       return res.status(400).json({ error: error.details[0].message });
     }
 
-    const { email, recoveryCode, newPassword } = req.body;
+    const { email, recoveryCode, newPassword } = value;
+    const pool = await getPool();
+    // Modificada la consulta para hacer JOIN con la tabla users
+    const [records] = await pool.query(
+      `SELECT pr.user_id FROM password_recovery pr
+      JOIN users u ON pr.user_id = u.id
+      WHERE u.email = ? AND pr.recovery_code = ? AND pr.expires_at > NOW()`,
+      [email, recoveryCode]
+    );
 
-    //Verificar si el usuario existe
-    const user = users.find((u) => u.email === email);
-    if (!user) {
-      return res.status(404).json({ error: "El usuario no existe." });
-    }
-
-    console.log("Código recibido:", recoveryCode);
-    console.log("Código esperado:", recoveryCodes[email]);
-
-    //Validar el codigo de recuperacion
-    if (!recoveryCodes[email] || recoveryCodes[email] !== recoveryCode) {
+    if (records.length === 0) {
       return res
         .status(400)
-        .json({ error: "Código de recuperación inválido." });
+        .json({ error: "Código de recuperación inválido o expirado." });
     }
 
     // Encriptar y actualizar la nueva contraseña
-    const hashedPassword = await hash(newPassword, 10);
-    user.password = hashedPassword;
+    const hashedPassword = await bcryptjs.hash(newPassword, 10);
+    await pool.query("UPDATE users SET password = ? WHERE id = ?", [
+      hashedPassword,
+      records[0].user_id,
+    ]);
 
     // Eliminar el código de recuperación usado
-    delete recoveryCodes[email];
+    await pool.query("DELETE FROM password_recovery WHERE recovery_code = ?", [
+      recoveryCode,
+    ]);
 
     res.status(200).json({ message: "Contraseña actualizada correctamente." });
   } catch (err) {
