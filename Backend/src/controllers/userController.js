@@ -102,6 +102,8 @@ const registerUser = async (req, res) => {
       [username, email, hashedPassword, name, last_name, avatar, rol]
     );
     res.status(201).json({ message: "Usuario registrado con éxito." });
+
+    await generateValidationCode({ body: { email } }, res);
   } catch (err) {
     console.error("Error en el controlador:", err.message);
     res.status(500).json({ error: "Error interno del servidor" });
@@ -148,6 +150,14 @@ const loginUser = async (req, res) => {
     const isPasswordValid = await compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Contraseña incorrecta." });
+    }
+
+    // Verificar si el usuario tiene la cuenta activada antes de generar el token
+    if (!user.is_active) {
+      return res.status(403).json({
+        error:
+          "Tu cuenta aún no ha sido activada. Verifica tu correo para activarla.",
+      });
     }
 
     // Generar un token JWT con una expiracion de 1 hora
@@ -211,9 +221,38 @@ export const generateValidationCode = async (req, res) => {
     );
 
     console.log(`Código de validación para ${email}: ${code}`);
-    res
-      .status(200)
-      .json({ message: "Código de validación generado y enviado." });
+    res;
+
+    // Inicializar el transporter para el envío del correo
+    let testAccount = await nodemailer.createTestAccount();
+    let transporter = nodemailer.createTransport({
+      host: testAccount.smtp.host,
+      port: testAccount.smtp.port,
+      secure: testAccount.smtp.secure,
+      auth: {
+        user: testAccount.user,
+        pass: testAccount.pass,
+      },
+    });
+
+    const mailOptions = {
+      from: '"Soporte Técnico" <support@example.com>',
+      to: email,
+      subject: "Código de Verificación de Usuario",
+      text: `Tu código de validación es: ${code}. Este código expirará el ${formattedExpiresAt}.`,
+      html: `<p>Tu código de validación es: <strong>${code}</strong>.</p><p>Este código expirará el <strong>${formattedExpiresAt}</strong>.</p>`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error al enviar el correo:", error);
+        return res.status(500).json({ error: "Error al enviar el correo." }); // Asegúrate de que salga del flujo
+      }
+      console.log("Correo enviado: " + nodemailer.getTestMessageUrl(info));
+      res
+        .status(200)
+        .json({ message: "Código de validación generado y enviado." }); // Solo responde aquí
+    });
   } catch (error) {
     console.error("Error al generar el código de validación:", error.message);
     res.status(500).json({ error: "Error interno del servidor." });
@@ -250,13 +289,19 @@ export const validateUserCode = async (req, res) => {
       `Exitoso: El código ${code} para ${email} es válido. Expira tras el uso`
     );
 
+    // Marcar la cuenta del usuario como activa en la tabla users
+    await pool.query("UPDATE users SET is_active = 1 WHERE email = ?", [email]);
+    console.log(`Cuenta activada para el usuario con email: ${email}`);
+
     // Eliminar el código usado
     await pool.query("DELETE FROM user_validation WHERE id = ?", [
       validationData[0].id,
       console.log("Codigo de validacion eliminado tras haber sido usado"),
     ]);
 
-    res.status(200).json({ message: "Usuario validado con éxito." });
+    res
+      .status(200)
+      .json({ message: "Usuario validado y cuenta activada con éxito." });
   } catch (error) {
     console.error("Error al validar el código:", error.message);
     res.status(500).json({ error: "Error interno del servidor." });
@@ -346,55 +391,55 @@ const passwordRecovery = async (req, res) => {
  */
 
 // Función para cambiar la contraseña
-const changePassword = async (req, res) => {
-  try {
-    console.log("Body recibido:", req.body); // Log para depurar
+// const changePassword = async (req, res) => {
+//   try {
+//     console.log("Body recibido:", req.body); // Log para depurar
 
-    const schema = Joi.object({
-      email: Joi.string().email().required(),
-      recoveryCode: Joi.string().required(),
-      newPassword: Joi.string().min(6).required(),
-    });
+//     const schema = Joi.object({
+//       email: Joi.string().email().required(),
+//       recoveryCode: Joi.string().required(),
+//       newPassword: Joi.string().min(6).required(),
+//     });
 
-    const { error, value } = schema.validate(req.body);
-    if (error) {
-      return res.status(400).json({ error: error.details[0].message });
-    }
+//     const { error, value } = schema.validate(req.body);
+//     if (error) {
+//       return res.status(400).json({ error: error.details[0].message });
+//     }
 
-    const { email, recoveryCode, newPassword } = value;
-    const pool = await getPool();
-    // Modificada la consulta para hacer JOIN con la tabla users
-    const [records] = await pool.query(
-      `SELECT pr.user_id FROM password_recovery pr
-      JOIN users u ON pr.user_id = u.id
-      WHERE u.email = ? AND pr.recovery_code = ? AND pr.expires_at > NOW()`,
-      [email, recoveryCode]
-    );
+//     const { email, recoveryCode, newPassword } = value;
+//     const pool = await getPool();
+//     // Modificada la consulta para hacer JOIN con la tabla users
+//     const [records] = await pool.query(
+//       `SELECT pr.user_id FROM password_recovery pr
+//       JOIN users u ON pr.user_id = u.id
+//       WHERE u.email = ? AND pr.recovery_code = ? AND pr.expires_at > NOW()`,
+//       [email, recoveryCode]
+//     );
 
-    if (records.length === 0) {
-      return res
-        .status(400)
-        .json({ error: "Código de recuperación inválido o expirado." });
-    }
+//     if (records.length === 0) {
+//       return res
+//         .status(400)
+//         .json({ error: "Código de recuperación inválido o expirado." });
+//     }
 
-    // Encriptar y actualizar la nueva contraseña
-    const hashedPassword = await bcryptjs.hash(newPassword, 10);
-    await pool.query("UPDATE users SET password = ? WHERE id = ?", [
-      hashedPassword,
-      records[0].user_id,
-    ]);
+//     // Encriptar y actualizar la nueva contraseña
+//     const hashedPassword = await bcryptjs.hash(newPassword, 10);
+//     await pool.query("UPDATE users SET password = ? WHERE id = ?", [
+//       hashedPassword,
+//       records[0].user_id,
+//     ]);
 
-    // Eliminar el código de recuperación usado
-    await pool.query("DELETE FROM password_recovery WHERE recovery_code = ?", [
-      recoveryCode,
-    ]);
+//     // Eliminar el código de recuperación usado
+//     await pool.query("DELETE FROM password_recovery WHERE recovery_code = ?", [
+//       recoveryCode,
+//     ]);
 
-    res.status(200).json({ message: "Contraseña actualizada correctamente." });
-  } catch (err) {
-    console.error("Error en changePassword:", err.message);
-    res.status(500).json({ error: "Error interno del servidor." });
-  }
-};
+//     res.status(200).json({ message: "Contraseña actualizada correctamente." });
+//   } catch (err) {
+//     console.error("Error en changePassword:", err.message);
+//     res.status(500).json({ error: "Error interno del servidor." });
+//   }
+// };
 
 //Este método se encargará de validar el token de recuperación y actualizar la contraseña del usuario.
 const resetPassword = async (req, res) => {
@@ -550,7 +595,6 @@ export default {
   registerUser,
   loginUser,
   passwordRecovery,
-  changePassword,
   resetPassword,
   sendPasswordResetNotification,
   updateUserProfile,

@@ -34,8 +34,10 @@ const RegisterForm = () => {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Registro exitoso. Ahora puedes iniciar sesión.");
-        navigate("/login");
+        alert(
+          "Registro exitoso. Verifica tu correo electrónico para validar tu cuenta."
+        );
+        navigate(`/validate-user?email=${formData.email}`);
       } else {
         setError(data.error || "Error al registrarse.");
       }
