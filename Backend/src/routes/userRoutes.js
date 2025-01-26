@@ -42,16 +42,16 @@ router.post(
   userController.sendPasswordResetNotification
 );
 
-// Ruta cambio de contraseña con autenticación
-router.post(
-  "/change-password",
-  authenticateUser,
-  (req, res, next) => {
-    console.log("Ruta /change-password alcanzada");
-    next(); // Pasar al siguiente middleware, que es el controlador de cambio de contraseña
-  },
-  userController.changePassword
-);
+// // Ruta cambio de contraseña con autenticación
+// router.post(
+//   "/change-password",
+//   authenticateUser,
+//   (req, res, next) => {
+//     console.log("Ruta /change-password alcanzada");
+//     next(); // Pasar al siguiente middleware, que es el controlador de cambio de contraseña
+//   },
+//   userController.changePassword
+// );
 
 // Ruta protegida (para probar autenticación)
 router.get("/protected", authenticateUser, (req, res) => {

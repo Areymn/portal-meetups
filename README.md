@@ -1,135 +1,192 @@
-# portal-meetups
+# Portal Meetups
 
-Proyecto colaborativo entre Carmen, Francisco, Alexiel y Sheyla
+### Proyecto colaborativo entre Francisco, Alexiel y Sheyla
 
-# Fran sprint 1
+---
 
-ESTRUCTURA
+SPRINT FRAN
 
--Carpeta -node_modules/ = Contiene todas las dependencias instaladas del proyecto.
-Se evita subir a git posteriormente con el documento .gitignore puesto que es muy grande y se puede regenerar usando: npm install.
-Ademas se genera de manera automatica en caso de borrarla utilizando el mismo comando.
+## Estructura del Proyecto
 
--Carpeta src/ = Contiene todo el código fuente del proyecto, es decir, los archivos que componen la aplicación backend.
+- **Carpeta `node_modules/`**: Contiene todas las dependencias instaladas del proyecto. Esta carpeta no se sube al repositorio gracias a `.gitignore`, y se puede regenerar con `npm install`.
 
-> controllers/ = Almacena las funciones controladoras que manejan la lógica principal de las rutas (Endpoints).
-> Mantiene la lógica separada de las rutas para un código modular y más limpio.
+- **Carpeta `src/`**: Contiene el código fuente del proyecto.
 
-      userController.js:
+  - **`controllers/`**: Incluye las funciones controladoras para manejar la lógica principal de las rutas (endpoints).
 
-         ·registerUser → Lógica de registro de usuarios.
-         ·loginUser → Lógica del login y generación de token JWT.
-         ·passwordRecovery → Lógica para generar un código de recuperación.
-         ·changePassword → Lógica para cambiar la contraseña.
+    - `userController.js`:
+      - `registerUser`: Registro de usuarios.
+      - `loginUser`: Inicio de sesión y generación de token JWT.
+      - `passwordRecovery`: Generación de un enlace de recuperación de contraseña.
+      - `changePassword`: Cambio de contraseña.
+      - `resetPassword`: Restablecimiento de contraseña a través de un enlace seguro.
+      - `sendPasswordResetNotification`: Envío de notificación por correo tras el cambio de contraseña.
+      - `updateUserProfile`: Actualización del perfil del usuario.
 
-> middlewares/ = Almacena funciones intermedias que se ejecutan entre la solicitud y la respuesta.
-> Permiten reutilizar lógica común (como autenticación) y aplicarla fácilmente a múltiples rutas.
+  - **`middlewares/`**: Contiene funciones que se ejecutan entre la solicitud y la respuesta.
 
-      authMiddleware.js: Middleware de autenticación que verifica si un token JWT es válido antes de permitir el acceso a rutas protegidas.
+    - `authMiddleware.js`: Middleware que verifica si un token JWT es válido.
+    - `uploadMiddleware.js`: Middleware para manejar la subida de archivos (como avatares).
 
-> routes/ = Define las rutas y conecta cada endpoint con su controlador correspondiente.
-> Mantiene todas las rutas organizadas y separadas de la lógica principal.
+  - **`routes/`**: Define las rutas y conecta cada endpoint con su controlador correspondiente.
 
-      userRoutes.js: Contiene las rutas relacionadas con los usuarios:
+    - `userRoutes.js`: Rutas relacionadas con los usuarios:
+      - `POST /api/users/register`: Registro de usuarios.
+      - `POST /api/users/login`: Inicio de sesión.
+      - `POST /api/users/password-recovery`: Recuperación de contraseña.
+      - `POST /api/users/reset-password`: Restablecimiento de contraseña.
+      - `POST /api/users/password-reset-notification`: Notificación tras cambio de contraseña.
+      - `PATCH /api/users/:id/profile`: Actualización del perfil del usuario.
+      - `POST /api/users/profile/upload`: Subida de imagen de perfil.
+      - `GET /api/users/protected`: Ejemplo de ruta protegida.
 
-         ·POST /api/users/register → Registro de usuario.
-         ·POST /api/users/login → Login de usuario.
-         ·POST /api/users/password-recovery → Recuperación de contraseña.
-         ·POST /api/users/change-password → Cambio de contraseña.
-         ·GET /api/users/protected → Ejemplo de ruta protegida.
+  - **`db/`**: Contiene utilidades relacionadas con la base de datos, como la conexión al pool y la inicialización.
 
-> index.js: Archivo principal del proyecto que inicializa el servidor Express.
+  - **`utils/`**: Incluye funciones auxiliares utilizadas en varias partes del proyecto.
 
-      ·Configuración de middlewares globales (body-parser, cors, etc.).
-      ·Importación y uso de rutas desde routes/.
-      ·Manejo de errores (404 y generales).
-      ·Inicialización del servidor en el puerto definido.
+  - **`index.js`**: Archivo principal del proyecto que inicializa el servidor Express:
+    - Configuración de middlewares globales (`body-parser`, `cors`, etc.).
+    - Importación y uso de rutas desde `routes/`.
+    - Manejo de errores (404 y generales).
+    - Inicialización del servidor en el puerto definido.
 
--Archivo env. : Almacena variables de entorno (claves secretas y configuraciones).
-Mantiene la información sensible fuera del código fuente.
+- **Archivo `.env`**: Almacena variables de entorno como claves secretas y configuraciones sensibles.
 
--Archivo .gitignore : Indica a Git qué archivos o carpetas ignorar (node_modules/, .env)
-Evita subir archivos innecesarios o sensibles al repositorio.
+- **Archivo `.gitignore`**: Especifica qué archivos o carpetas ignorar en el repositorio (como `node_modules/` y `.env`).
 
--Archivo package-lock.json : Guarda las versiones exactas de las dependencias instaladas para que el proyecto funcione de la misma manera en cualquier lugar.
-Aunque se puede regenerar, borrarlo puede llevar a inconsistencias en versiones de dependencias cuando trabajas en equipo.
+- **Archivo `package.json`**: Define las dependencias, scripts y metadatos del proyecto Node.js.
 
--Archivo package.json: Define las dependencias y scripts del proyecto Node.js.
+  - **Dependencias principales**:
+    - `express`: Framework para construir el servidor.
+    - `bcryptjs`: Para encriptar contraseñas.
+    - `jsonwebtoken`: Para generar y verificar tokens JWT.
+    - `joi`: Para validación de datos.
+    - `nodemailer`: Para el envío de correos electrónicos.
 
-> Lista de dependencias (express, bcryptjs, jsonwebtoken, etc.).
-> Scripts como start y dev para iniciar el servidor.
+---
 
-//**************\*\*\*\***************\***************\*\*\*\***************
+## Funcionalidades Implementadas
 
-1.  Creación del SERVIDOR con Express
+### 1. Servidor Express
 
-    Configuracion de un servidor básico con Express.
+- Configuración inicial del servidor con middlewares básicos como `body-parser` y `cors`.
+- Ruta base `GET /` para confirmar que el servidor está corriendo.
 
-    -Busque que dependencias eran necesarias instalar para el proyecto (express, dotenv, cors, etc.).
+### 2. Registro de Usuarios (Sign Up)
 
-    -Creamos el archivo index.js como punto de entrada principal.
+- Endpoint: `POST /api/users/register`.
+- Lógica:
+  - Validación de datos con `Joi`.
+  - Encriptación de contraseña con `bcryptjs`.
+  - Inserción de datos en la base de datos.
 
-    -Configuramos middlewares básicos: >bodyParser.json() para parsear el body de las solicitudes. >cors() para permitir peticiones desde otros dominios.
+### 3. Inicio de Sesión (Login)
 
-    -Añadimos una ruta base (GET /) para confirmar que el servidor funcionaba.
+- Endpoint: `POST /api/users/login`.
+- Lógica:
+  - Validación de credenciales.
+  - Comparación de contraseñas encriptadas.
+  - Generación de un token JWT válido.
 
-          >Resultado: Servidor corriendo correctamente en http://localhost:5000.
+### 4. Recuperación de Contraseña
 
-2.  Endpoint de SIGN UP (REGISTRO) de usuarios
+- Endpoint: `POST /api/users/password-recovery`.
+- Lógica:
+  - Generación de un token único con información del usuario.
+  - Envío de un enlace seguro por correo.
 
-    Para permitir que los usuarios se registren.
+### 5. Restablecimiento de Contraseña
 
-    -Creamos la ruta POST /api/users/register en userRoutes.js.
+- Endpoint: `POST /api/users/reset-password`.
+- Lógica:
+  - Validación del token recibido.
+  - Actualización de la contraseña del usuario.
+  - Envío de correo de confirmación tras el cambio.
 
-    -Implementamos la lógica en el controlador registerUser: >Validación de datos usando Joi (email, username, password). >Encriptación de la contraseña con bcryptjs. >Simulamos una base de datos en memoria usando un array (users).
+### 6. Middleware de Autenticación
 
-    -Probamos la ruta con Postman.
+- Middleware: `authenticateUser`.
+- Lógica:
+  - Verifica la validez del token JWT.
+  - Adjunta los datos del usuario al objeto `req`.
 
-          >Resultado: Los usuarios pueden registrarse exitosamente.
+### 7. Actualización del Perfil
 
-3.  Endpoint de LOGIN (INICIO DE SESION) de usuarios
+- Endpoint: `PATCH /api/users/:id/profile`.
+- Lógica:
+  - Permite a los usuarios actualizar su información (como nombre, apellido y avatar).
+  - Autenticación requerida para garantizar que el usuario esté autorizado a realizar cambios.
 
-    Permite que los usuarios inicien sesión y obtiene un token JWT.
+### 8. Subida de Imagen de Perfil
 
-    -Creamos la ruta POST /api/users/login en userRoutes.js.
+- Endpoint: `POST /api/users/profile/upload`.
+- Lógica:
+  - Utiliza el middleware `uploadMiddleware` para manejar la subida de archivos.
+  - Almacena la ruta del archivo en el perfil del usuario.
 
-    -Implementamos la lógica en el controlador loginUser: >Validación de datos (email y contraseña). >Comparación de contraseñas usando bcrypt.compare. >Generación de un token JWT con jsonwebtoken que contiene datos del usuario.
+### 9. Rutas Protegidas
 
-    -Probamos la ruta con Postman.
+- Ejemplo: `GET /api/users/protected`.
+- Solo accesible con un token JWT válido.
 
-          >Resultado: Los usuarios pueden iniciar sesión y reciben un token JWT válido.
+### 10. Notificación por Cambio de Contraseña
 
-4.  Endpoint de recuperación de CONTRASEÑA
+- Endpoint: `POST /api/users/password-reset-notification`.
+- Envío de un correo al usuario notificando el cambio exitoso.
 
-    Envia un código de recuperación a un usuario que olvidó su contraseña.
+---
 
-    -Creamos la ruta POST /api/users/password-recovery.
+## Proceso de Desarrollo
 
-    -Implementamos la lógica en el controlador passwordRecovery: >Validación del email con Joi. >Generación de un código único con crypto.randomBytes. >Simulamos el envío del código a través de consola (usamos un objeto recoveryCodes para almacenarlo temporalmente).
+1. **Inicio del Proyecto**:
 
-    -Probamos la ruta para confirmar que el código se genera.
+   - Instalación de dependencias necesarias (`express`, `dotenv`, `cors`, etc.).
+   - Configuración inicial del servidor en `index.js`.
 
-          >Resultado: El código de recuperación se genera y almacena correctamente.
+2. **Base de Datos**:
 
-5.  Endpoint de cambio de CONTRASEÑA
-    Permite que el usuario cambie su contraseña usando el código de recuperación.
+   - Configuración del pool de conexión a MySQL.
+   - Estructuración de tablas relevantes (`users`, `password_recovery`, etc.).
 
-    -Creamos la ruta POST /api/users/change-password.
+3. **Endpoints de Usuarios**:
 
-    -Implementamos la lógica en el controlador changePassword: >Validación del email, código de recuperación y nueva contraseña. >Verificación de que el código de recuperación coincide. >Encriptación de la nueva contraseña con bcrypt. >Actualización de la contraseña en la "base de datos".
+   - Registro, inicio de sesión, recuperación y cambio de contraseña.
 
-    -Probamos la ruta con el código generado.
+4. **Integración de Middleware**:
 
-          >Resultado: El usuario puede cambiar su contraseña exitosamente.
+   - Autenticación y manejo de errores.
 
-6.  Middleware de verificación de AUTENTICACION
+5. **Envío de Correos**:
 
-    Implementación del middleware para proteger rutas privadas.
+   - Simulación con `nodemailer` usando cuentas de prueba de Ethereal.
 
-    -Creamos el archivo authMiddleware.js.
+6. **Subida y Manejo de Archivos**:
+   - Configuración del middleware para permitir a los usuarios subir imágenes.
 
-    -Implementamos el middleware authenticateUser: >Verificación de que el token JWT existe y es válido. >Adjuntamos la información del usuario decodificada a req.user.
+---
 
-    -Probamos el middleware creando una ruta protegida temporal en userRoutes.js.
+## Cómo Ejecutar el Proyecto
 
-          >Resultado: Las rutas protegidas ahora requieren un token JWT válido para ser accesibles.
+1. Clonar el repositorio:
+
+   ```bash
+   git clone <url-del-repositorio>
+   ```
+
+2. Instalar dependencias:
+
+   ```bash
+   npm install
+   ```
+
+3. Configurar variables de entorno:
+
+   - Crear un archivo `.env` basado en el ejemplo proporcionado.
+
+4. Iniciar el servidor:
+
+   ```bash
+   npm start
+   ```
+
+5. Probar los endpoints usando herramientas como Postman.

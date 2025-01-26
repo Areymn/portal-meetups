@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import "../UserValidationForm.css";
 import { useUserContext } from "../context/UserContext";
+import { useNavigate } from "react-router-dom";
 
 const UserValidationForm = () => {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [message, setMessage] = useState(""); // Para mostrar mensajes al usuario
   const { token } = useUserContext(); // Obtener el token desde el contexto
+  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -28,9 +30,12 @@ const UserValidationForm = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage("Usuario validado con éxito");
+        setMessage("Usuario validado con éxito y cuenta activada");
         console.log("Validación exitosa:", data);
-        // Puedes redirigir o mostrar información adicional aquí
+        // Redirige al login
+        setTimeout(() => {
+          navigate("/login");
+        }, 1500);
       } else {
         setMessage(data.error || "Error al validar el código");
         console.error("Error recibido del backend:", data);
