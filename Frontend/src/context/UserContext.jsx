@@ -7,14 +7,23 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState("");
+  const [passwordResetCompleted, setPasswordResetCompleted] = useState(false); // Nuevo estado
 
   // Leer el token y el usuario desde localStorage al iniciar la aplicación
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     const savedToken = localStorage.getItem("token");
+    console.log(
+      "Cargando usuario y token desde localStorage:",
+      savedUser,
+      savedToken
+    );
     if (savedUser && savedToken) {
       setUser(JSON.parse(savedUser));
       setToken(savedToken);
+      console.log("Usuario cargado:", savedUser);
+    } else {
+      console.log("No se encontró usuario o token.");
     }
   }, []);
 
@@ -33,6 +42,7 @@ export const UserProvider = ({ children }) => {
     // Limpiar el estado
     setUser(null);
     setToken("");
+    setPasswordResetCompleted(false); // Reinicia el estado de restablecimiento de contraseña
 
     // Eliminar los datos de localStorage
     localStorage.removeItem("user");
@@ -40,7 +50,16 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, token, login, logout }}>
+    <UserContext.Provider
+      value={{
+        user,
+        token,
+        login,
+        logout,
+        passwordResetCompleted,
+        setPasswordResetCompleted, // Exponemos el setter
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

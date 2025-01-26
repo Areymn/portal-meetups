@@ -34,6 +34,14 @@ router.post("/validate-user-code", validateUserCode);
 //Ruta recuperacion de contraseña
 router.post("/password-recovery", userController.passwordRecovery);
 
+// Ruta para cambiar contraseña con el token de recuperación
+router.post("/reset-password", userController.resetPassword);
+
+router.post(
+  "/password-reset-notification",
+  userController.sendPasswordResetNotification
+);
+
 // Ruta cambio de contraseña con autenticación
 router.post(
   "/change-password",
