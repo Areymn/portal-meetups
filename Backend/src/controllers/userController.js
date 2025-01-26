@@ -295,19 +295,17 @@ const passwordRecovery = async (req, res) => {
   }
 
   const userId = users[0].id;
-  // Generar y guarda un código único
-  const recoveryCode = randomBytes(20).toString("hex");
-  await pool.query(
-    "INSERT INTO password_recovery (user_id, recovery_code, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 1 HOUR))",
-    [userId, recoveryCode]
-  );
+  // Generar un token JWT con el ID del usuario
+  const token = sign({ userId, email }, JWT_SECRET, { expiresIn: "1h" });
 
-  console.log("Código generado:", recoveryCode); // Log para confirmar
+  const decodedToken = verify(token, JWT_SECRET);
+  console.log("Contenido del token generado:", decodedToken);
 
-  //Logica para enviar correos.
-  // Crear una cuenta de prueba Ethereal automáticamente y enviar el correo
+  // Log para pruebas
+  console.log("Token generado para recuperación de contraseña:", token);
+
+  // Enviar el token por correo
   let testAccount = await nodemailer.createTestAccount();
-
   let transporter = nodemailer.createTransport({
     host: testAccount.smtp.host,
     port: testAccount.smtp.port,
@@ -318,25 +316,27 @@ const passwordRecovery = async (req, res) => {
     },
   });
 
+  const resetLink = `http://localhost:5173/password-reset?token=${token}`;
+
   const mailOptions = {
-    from: '"Soporte Técnico" <support@example.com>', // dirección del remitente
-    to: email, // lista de destinatarios
-    subject: "Código de Recuperación de Contraseña", // Línea de asunto
-    text: `Tu código de recuperación es: ${recoveryCode}`, // cuerpo del texto plano
-    html: `<b>Tu código de recuperación es:</b> ${recoveryCode}`, // cuerpo del HTML
+    from: '"Soporte Técnico" <support@example.com>',
+    to: email,
+    subject: "Recuperación de Contraseña",
+    text: `Haz clic en el siguiente enlace para restablecer tu contraseña: ${resetLink}`,
+    html: `<p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
+          <a href="${resetLink}">${resetLink}</a>`,
   };
 
-  transporter.sendMail(mailOptions, function (error, info) {
+  transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.log(error);
       return res.status(500).json({ error: "Error al enviar el correo." });
-    } else {
-      console.log("Correo enviado: " + nodemailer.getTestMessageUrl(info));
-      res.status(200).json({
-        message: "Código de recuperación enviado por correo.",
-        previewUrl: nodemailer.getTestMessageUrl(info),
-      });
     }
+    console.log("Correo enviado: " + nodemailer.getTestMessageUrl(info));
+    res.status(200).json({
+      message: "Enlace de recuperación enviado por correo.",
+      previewUrl: nodemailer.getTestMessageUrl(info),
+    });
   });
 };
 
@@ -396,6 +396,119 @@ const changePassword = async (req, res) => {
   }
 };
 
+//Este método se encargará de validar el token de recuperación y actualizar la contraseña del usuario.
+const resetPassword = async (req, res) => {
+  try {
+    // Validar el esquema de entrada
+    const schema = Joi.object({
+      token: Joi.string().required(),
+      newPassword: Joi.string().min(6).required(),
+    });
+
+    const { error, value } = schema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const { token, newPassword } = value;
+
+    // Verificar y decodificar el token
+    let payload;
+    try {
+      payload = verify(token, JWT_SECRET);
+    } catch (err) {
+      return res.status(400).json({ error: "Token inválido o expirado." });
+    }
+
+    // Validar que el token contiene un email válido
+    if (!payload.email) {
+      return res
+        .status(400)
+        .json({ error: "El token no contiene un email válido." });
+    }
+
+    const { userId, email } = payload; // Extraer email y userId del token
+
+    const pool = await getPool();
+
+    // Verificar si el usuario aún existe en la base de datos
+    const [users] = await pool.query(
+      "SELECT id FROM users WHERE id = ? AND email = ?",
+      [userId, email]
+    );
+
+    if (users.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "El usuario asociado al token no fue encontrado." });
+    }
+
+    // Encriptar y actualizar la nueva contraseña
+    const hashedPassword = await hash(newPassword, 10);
+    await pool.query("UPDATE users SET password = ? WHERE id = ?", [
+      hashedPassword,
+      userId,
+    ]);
+
+    console.log(
+      `Contraseña restablecida para el usuario con ID: ${userId} y Email: ${email}`
+    );
+
+    // Enviar correo de confirmación de restablecimiento
+    let testAccount = await nodemailer.createTestAccount();
+    let transporter = nodemailer.createTransport({
+      host: testAccount.smtp.host,
+      port: testAccount.smtp.port,
+      secure: testAccount.smtp.secure,
+      auth: {
+        user: testAccount.user,
+        pass: testAccount.pass,
+      },
+    });
+
+    const mailOptions = {
+      from: '"Soporte Técnico" <support@example.com>',
+      to: email,
+      subject: "Confirmación de Restablecimiento de Contraseña",
+      text: "Tu contraseña ha sido restablecida correctamente.",
+      html: "<p>Tu contraseña ha sido <strong>restablecida</strong> correctamente.</p>",
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error al enviar el correo:", error);
+      } else {
+        console.log(
+          "Correo de confirmación enviado: " +
+            nodemailer.getTestMessageUrl(info)
+        );
+      }
+    });
+
+    // Respuesta de éxito al cliente
+    res.status(200).json({ message: "Contraseña actualizada correctamente." });
+  } catch (err) {
+    console.error("Error en resetPassword:", err.message);
+    res.status(500).json({ error: "Error interno del servidor." });
+  }
+};
+
+export const sendPasswordResetNotification = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "Email requerido" });
+  }
+
+  try {
+    console.log(`Notificación enviada al correo: ${email}`);
+    res.status(200).json({ message: "Notificación enviada exitosamente." });
+  } catch (error) {
+    console.error("Error al enviar la notificación:", error.message);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
 // ------------------------- ACTUALIZAR PERFIL DE USUARIO-------------------------
 
 const updateUserProfile = async (req, res) => {
@@ -438,5 +551,7 @@ export default {
   loginUser,
   passwordRecovery,
   changePassword,
+  resetPassword,
+  sendPasswordResetNotification,
   updateUserProfile,
 };

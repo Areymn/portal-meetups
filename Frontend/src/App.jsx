@@ -12,6 +12,11 @@ import RegisterForm from "./components/RegisterForm";
 import LoginForm from "./components/LoginForm"; // Componente para iniciar sesión
 import UserValidationForm from "./components/UserValidationForm"; // Componente de validación de usuario
 import ProtectedRoute from "./components/ProtectedRoute"; // Nuevo componente para proteger rutas
+import PasswordRecoveryForm from "./components/PasswordRecoveryForm";
+import PasswordRecoverySuccess from "./components/PasswordRecoverySuccess";
+import PasswordResetForm from "./components/PasswordResetForm";
+import PasswordResetSuccess from "./components/PasswordResetSuccess";
+
 import "./App.css"; // Importa tus estilos si es necesario
 
 const App = () => {
@@ -26,9 +31,22 @@ const App = () => {
     <Router>
       <div className="App">
         <Routes>
-          {/* Ruta para iniciar sesión */}
+          {/* Ruta para recuperar contraseña */}
+          <Route path="/password-recovery" element={<PasswordRecoveryForm />} />
+          {/* Ruta para pantalla correo enviado con exito */}
+          <Route
+            path="/password-recovery-success"
+            element={<PasswordRecoverySuccess />}
+          />
+          {/* Ruta para reestablecer contraseña */}
+          <Route path="/password-reset" element={<PasswordResetForm />} />
+          {/* Ruta para pantalla contraseña restablecida*/}
+          <Route
+            path="/password-reset-success"
+            element={<PasswordResetSuccess />}
+          />
+          {/* Ruta para registrarse */}
           <Route path="/register" element={<RegisterForm />} />
-
           {/* Ruta para iniciar sesión */}
           <Route path="/login" element={<LoginForm />} />
 
