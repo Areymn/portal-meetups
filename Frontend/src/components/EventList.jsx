@@ -7,8 +7,10 @@ import { faSort } from "@fortawesome/free-solid-svg-icons";
 const EventList = () => {
   const [events, setEvents] = useState([]);
   const [cities, setCities] = useState([]);
+  const [themes, setThemes] = useState([]); // Estado para las temáticas
   const [error, setError] = useState("");
   const [filterCity, setFilterCity] = useState(""); // Estado para el filtro de ciudad
+  const [filterTheme, setFilterTheme] = useState(""); // Estado para el filtro por temática
   const [sortOrder, setSortOrder] = useState("date"); // Estado para la ordenación
   const { authenticatedFetch } = useUserContext();
 
@@ -54,14 +56,38 @@ const EventList = () => {
       }
     };
 
+    // Cargar temáticas dinámicamente
+    const fetchThemes = async () => {
+      try {
+        console.log("Iniciando la solicitud para obtener temáticas...");
+        const data = await authenticatedFetch(
+          "http://localhost:5000/api/meetups/themes"
+        );
+
+        if (data && Array.isArray(data.themes)) {
+          console.log("Temáticas recibidas:", data.themes);
+          setThemes(data.themes);
+        } else {
+          throw new Error("Formato de respuesta inválido al obtener temáticas");
+        }
+      } catch (error) {
+        console.error("Error al cargar las temáticas:", error.message);
+      }
+    };
+
     fetchEvents();
     fetchCities();
+    fetchThemes();
   }, [authenticatedFetch]);
 
   // Filtrar y ordenar eventos
   const filteredAndSortedEvents = events
     .filter((event) => {
-      return filterCity ? event.place === filterCity : true;
+      const matchesCity = filterCity ? event.place === filterCity : true;
+      const matchesTheme = filterTheme
+        ? event.themeId === parseInt(filterTheme)
+        : true;
+      return matchesCity && matchesTheme;
     })
     .sort((a, b) => {
       if (sortOrder === "date") return new Date(a.date) - new Date(b.date);
@@ -88,6 +114,22 @@ const EventList = () => {
             {cities.map((city, index) => (
               <option key={index} value={city}>
                 {city}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="filter-group">
+          <label htmlFor="theme">Filtrar por temática:</label>
+          <select
+            id="theme"
+            onChange={(e) => setFilterTheme(e.target.value)}
+            value={filterTheme}
+          >
+            <option value="">Todas</option>
+            {themes.map((theme) => (
+              <option key={theme.id} value={theme.id}>
+                {theme.name}
               </option>
             ))}
           </select>

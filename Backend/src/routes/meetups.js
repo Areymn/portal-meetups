@@ -1,42 +1,54 @@
-"user strict";
+"use strict";
 
-// import { isAdmin } from "../db/events.js"; //NO SE USA DE MOMENTO
-
+// Console para depuración
 console.log("Rutas de meetups cargadas correctamente");
 
-// Importar dependencias/// CAMBIADAS POR REQUIRE PARA MANTENER CONSISTENCIA
+// Importar dependencias
 import { Router } from "express";
 import { createEvents } from "../controllers/meetups/createEvent.js";
-import { detailEvent } from "../controllers/meetups/detailEvent.js";
+import {
+  detailEvent,
+  getCities,
+  getThemes,
+} from "../controllers/meetups/detailEvent.js"; // Agregamos getThemes
 import { getEvents } from "../controllers/meetups/sortEvent.js";
 import { signupEvent } from "../controllers/meetups/signupEvent.js";
 import { editEvent } from "../controllers/meetups/editEvent.js";
 import { validateEvent } from "../controllers/meetups/validateEvent.js";
 import { authenticateAdmin } from "../middlewares/authAdmin.js";
 import { authenticateUser } from "../middlewares/authMiddleware.js";
-//IMPORTA RATE
 import { rateEvent } from "../controllers/meetups/rateEvent.js";
-import { getCities } from "../controllers/meetups/detailEvent.js";
 
-const router = Router(); // Crear una instancia del router de Express
+// Crear una instancia del router de Express
+const router = Router();
 
 // ------------------------- RUTAS DE MEETUPS -------------------------
 
-// Rutas de meetups
+// Ruta para crear un evento
 router.post("/create", authenticateUser, createEvents);
 
+// Ruta para obtener los detalles de un evento
 router.get("/:id/detail", authenticateUser, detailEvent);
 
+// Ruta para editar un evento
 router.put("/edit/:id", authenticateUser, editEvent);
 
+// Ruta para inscribirse en un evento
 router.post("/signup", authenticateUser, signupEvent);
 
+// Ruta para que el administrador valide eventos
 router.post("/admin/validate", authenticateAdmin, validateEvent);
 
+// Ruta para obtener ciudades
 router.get("/cities", getCities);
 
+// Ruta para obtener temáticas
+router.get("/themes", getThemes);
+
+// Ruta para obtener y ordenar eventos
 router.get("/", getEvents);
 
+// Ruta para valorar un evento
 router.post(
   "/:id/rate",
   authenticateUser,
