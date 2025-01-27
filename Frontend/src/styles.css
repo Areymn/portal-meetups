@@ -249,3 +249,58 @@ button:hover {
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+
+/**filtros**/
+
+/* Filtros */
+.filter-form {
+  display: flex;
+  justify-content: center; /* Centrar horizontalmente */
+  align-items: center; /* Alinear verticalmente */
+  gap: 15px; /* Espacio entre filtros */
+  margin: 20px auto;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column; /* Etiqueta arriba, select abajo */
+  align-items: flex-start;
+}
+
+.filter-group label {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.filter-group select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #555;
+}
+
+.filter-group select:hover {
+  border-color: #007bff;
+}
+
+.filter-group select:focus {
+  border-color: #0056b3;
+  outline: none;
+  box-shadow: 0 0 4px rgba(0, 91, 179, 0.5);
+}
+
+/* Estilo de selectores en fila */
+.filter-form.horizontal {
+  flex-direction: row;
+}
+
+.filter-form.horizontal .filter-group {
+  margin: 0 10px; /* Espaciado entre columnas */
+}

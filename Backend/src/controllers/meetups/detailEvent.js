@@ -3,7 +3,7 @@
 // -------------------------
 // IMPORTAR DEPENDENCIAS
 // -------------------------
-import getPool from "../../db/getPool.js";
+import getPool from "../../db/getPool.js"; // Importa la conexión correcta a la base de datos
 
 // -------------------------
 // FUNCIÓN PARA VER LOS DETALLES DE UN EVENTO
@@ -57,11 +57,9 @@ export const detailEvent = async (req, res) => {
       [id]
     );
 
-    event.comments = comments; // Agrega los comentarios al objeto del evento
-    console.log("Comentarios recuperados:", comments);
-
     // Log para depuración: Detalles del evento encontrado
     console.log(`Detalles del evento con ID ${eventId}:`, event[0]);
+    console.log("Comentarios recuperados:", comments);
 
     // Devolver los detalles del evento al cliente
     return res.status(200).json({ event: { ...event[0], comments } });
@@ -74,7 +72,29 @@ export const detailEvent = async (req, res) => {
   }
 };
 
+//-----------------------------
+// FUNCIÓN PARA OBTENER CIUDADES
+//-----------------------------
+
+/**
+ * Controlador para obtener las ciudades disponibles para filtrar eventos.
+ * @param {Object} req - La solicitud HTTP.
+ * @param {Object} res - La respuesta HTTP que se enviará al cliente.
+ */
+export const getCities = async (req, res) => {
+  try {
+    const pool = await getPool(); // Asegúrate de usar el mismo pool para todas las consultas
+    const [cities] = await pool.query("SELECT DISTINCT place FROM events");
+    console.log("Ciudades recuperadas:", cities);
+
+    res.status(200).json({ cities: cities.map((city) => city.place) });
+  } catch (error) {
+    console.error("Error al obtener las ciudades:", error.message);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
 // -------------------------
 // EXPORTAR FUNCIONES
 // -------------------------
-export default { detailEvent };
+// export { detailEvent };
