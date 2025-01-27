@@ -30,17 +30,17 @@ const timeZone = "Europe/Madrid"; // Ajusta a la zona horaria que necesitas
 
 // ------------------------- CREAR USUARIO TEMPORAL -------------------------
 
-(async () => {
-  // Creacion de un usuario temporal con contraseña encriptada
-  const hashedPassword = await hash("123456", 10); // Contraseña temporal: 123456
-  users.push({
-    id: uuidv4(), // Genera un ID único
-    email: "test@example.com",
-    username: "testuser",
-    password: hashedPassword,
-  });
-  console.log("Usuario temporal creado:", users);
-})();
+// (async () => {
+//   // Creacion de un usuario temporal con contraseña encriptada
+//   const hashedPassword = await hash("123456", 10); // Contraseña temporal: 123456
+//   users.push({
+//     id: uuidv4(), // Genera un ID único
+//     email: "test@example.com",
+//     username: "testuser",
+//     password: hashedPassword,
+//   });
+//   console.log("Usuario temporal creado:", users);
+// })();
 
 // ------------------------- REGISTRO DE USUARIOS -------------------------
 
@@ -162,7 +162,7 @@ const loginUser = async (req, res) => {
 
     // Generar un token JWT con una expiracion de 1 hora
     const token = sign(
-      { email: user.email, username: user.username },
+      { user_id: user.id, email: user.email, username: user.username },
       JWT_SECRET,
       { expiresIn: "1h" } // El token expira en 1 hora
     );

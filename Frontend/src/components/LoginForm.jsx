@@ -1,6 +1,6 @@
 // src/components/LoginForm.jsx
 
-import React, { useState } from "react"; //hook que permite manejar el estado dentro del componente
+import React, { useState } from "react"; // Hook que permite manejar el estado dentro del componente
 import { useNavigate } from "react-router-dom"; // Hook para redirigir
 import { useUserContext } from "../context/UserContext";
 
@@ -28,16 +28,16 @@ const LoginForm = () => {
       if (response.ok) {
         // Guardamos el token en el contexto
         const loggedInUser = data.username || email; // Nombre de usuario recibido del backend o email usado
-        login({ username: loggedInUser }, data.token);
+        login({ username: loggedInUser, email: data.email }, data.token);
 
         console.log("Token recibido:", data.token);
         console.log("Usuario logueado:", loggedInUser);
 
-        alert("Inicio de sesión exitoso");
-        // Redirige al usuario a la página principal después del login
-        navigate("/"); // Cambia la ruta a "/"
+        // Redirige al usuario a la lista de eventos después del login
+        navigate("/");
       } else {
         // Manejamos errores del backend
+        console.error("Error en el inicio de sesión:", data.error);
         alert(data.error || "Error al iniciar sesión");
       }
     } catch (error) {
@@ -49,18 +49,20 @@ const LoginForm = () => {
   return (
     <form onSubmit={handleSubmit}>
       <div>
-        <label>Correo Electrónico</label>
+        <label htmlFor="email">Correo Electrónico</label>
         <input
           type="email"
+          id="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
       </div>
       <div>
-        <label>Contraseña</label>
+        <label htmlFor="password">Contraseña</label>
         <input
           type="password"
+          id="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required

@@ -21,12 +21,12 @@ const router = Router(); // Crear una instancia del router de Express
 
 // ------------------------- RUTAS DE MEETUPS -------------------------
 
-// Rutas de meetups// CAMBIADAS LETRAS PORQUE DABA ERROR POR CITAR BIEN LAS PALABRAS
+// Rutas de meetups
 router.post("/create", authenticateUser, createEvents);
 
-router.post("/detail", detailEvent);
+router.get("/:id/detail", authenticateUser, detailEvent);
 
-router.post("/edit", editEvent);
+router.put("/edit/:id", authenticateUser, editEvent);
 
 router.post("/signup", authenticateUser, signupEvent);
 
@@ -34,8 +34,15 @@ router.post("/admin/validate", authenticateAdmin, validateEvent);
 
 router.get("/", getEvents);
 
-//ENDPOINT PARA AÑADIR RATING Y COMENTARIO
-router.post("/:id/rate", rateEvent);
+router.post(
+  "/:id/rate",
+  authenticateUser,
+  (req, res, next) => {
+    console.log(`Endpoint /rate llamado para el evento ID: ${req.params.id}`);
+    next();
+  },
+  rateEvent
+);
 
 // ------------------------- EXPORTAR RUTAS -------------------------
 export default router;
