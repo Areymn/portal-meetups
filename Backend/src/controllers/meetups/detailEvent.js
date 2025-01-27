@@ -11,21 +11,16 @@ import getPool from "../../db/getPool.js"; // Importa la conexión correcta a la
 
 /**
  * Controlador para obtener los detalles de un evento específico.
- * @param {Object} req - La solicitud HTTP que contiene el ID del evento como parámetro en `req.params`.
- * @param {Object} res - La respuesta HTTP que se enviará al cliente.
  */
 export const detailEvent = async (req, res) => {
   try {
-    // Log para depuración: imprime los datos recibidos en la solicitud.
     console.log("Solicitud recibida para detalles del evento:", req.params);
 
-    // Validar que se haya proporcionado un ID del evento.
     const { id } = req.params;
     if (!id) {
       return res.status(400).json({ error: "Se requiere el ID del evento." });
     }
 
-    // Convertir el ID del evento a un número entero para buscarlo.
     const eventId = parseInt(id, 10);
     if (isNaN(eventId)) {
       return res
@@ -33,13 +28,11 @@ export const detailEvent = async (req, res) => {
         .json({ error: "El ID del evento debe ser un número válido." });
     }
 
-    // Obtener el pool de conexiones y consultar la base de datos
     const pool = await getPool();
     const [event] = await pool.query("SELECT * FROM events WHERE id = ?", [
       eventId,
     ]);
 
-    // Verificar si el evento fue encontrado
     if (event.length === 0) {
       console.log(`Evento con ID ${eventId} no encontrado.`);
       return res.status(404).json({ error: "Evento no encontrado." });
@@ -57,33 +50,26 @@ export const detailEvent = async (req, res) => {
       [id]
     );
 
-    // Log para depuración: Detalles del evento encontrado
     console.log(`Detalles del evento con ID ${eventId}:`, event[0]);
     console.log("Comentarios recuperados:", comments);
 
-    // Devolver los detalles del evento al cliente
     return res.status(200).json({ event: { ...event[0], comments } });
   } catch (err) {
-    // Capturar y manejar cualquier error inesperado.
     console.error("Error en el controlador de detalles del evento:", err);
-
-    // Enviar una respuesta con el código 500 para indicar un error interno del servidor.
     return res.status(500).json({ error: "Error interno del servidor." });
   }
 };
 
-//-----------------------------
+// -------------------------
 // FUNCIÓN PARA OBTENER CIUDADES
-//-----------------------------
+// -------------------------
 
 /**
  * Controlador para obtener las ciudades disponibles para filtrar eventos.
- * @param {Object} req - La solicitud HTTP.
- * @param {Object} res - La respuesta HTTP que se enviará al cliente.
  */
 export const getCities = async (req, res) => {
   try {
-    const pool = await getPool(); // Asegúrate de usar el mismo pool para todas las consultas
+    const pool = await getPool();
     const [cities] = await pool.query("SELECT DISTINCT place FROM events");
     console.log("Ciudades recuperadas:", cities);
 
@@ -95,6 +81,26 @@ export const getCities = async (req, res) => {
 };
 
 // -------------------------
+// FUNCIÓN PARA OBTENER TEMÁTICAS
+// -------------------------
+
+/**
+ * Controlador para obtener la lista de temáticas disponibles.
+ */
+export const getThemes = async (req, res) => {
+  try {
+    const pool = await getPool();
+    const [themes] = await pool.query("SELECT DISTINCT id, name FROM themes");
+    console.log("Temáticas recuperadas:", themes);
+
+    return res.status(200).json({ themes });
+  } catch (error) {
+    console.error("Error al obtener las temáticas:", error.message);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
+// -------------------------
 // EXPORTAR FUNCIONES
 // -------------------------
-// export { detailEvent };
+// export { detailEvent, getCities, getThemes };
