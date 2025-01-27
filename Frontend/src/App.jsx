@@ -18,6 +18,7 @@ import PasswordResetForm from "./components/PasswordResetForm";
 import PasswordResetSuccess from "./components/PasswordResetSuccess";
 import EventDetail from "./components/EventDetail";
 import EventList from "./components/EventList";
+import NotFound from "./components/NotFound";
 
 import "./App.css"; // Importa tus estilos si es necesario
 
@@ -96,7 +97,7 @@ const App = () => {
           />
 
           {/* Captura cualquier ruta no definida y redirige al login */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </Router>
