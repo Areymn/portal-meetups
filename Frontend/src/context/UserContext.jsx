@@ -49,6 +49,39 @@ export const UserProvider = ({ children }) => {
     localStorage.removeItem("token");
   };
 
+  // Nuevo método para realizar solicitudes autenticadas al backend
+  const authenticatedFetch = async (url, options = {}) => {
+    try {
+      const headers = {
+        ...options.headers,
+        Authorization: `Bearer ${token}`, // Añade el token al encabezado
+        "Content-Type": "application/json",
+      };
+      const response = await fetch(url, { ...options, headers });
+
+      // Si la respuesta no es "ok", manejar el error
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error(
+          `Error en la solicitud (${response.status}):`,
+          errorData.error || errorData
+        );
+        throw new Error(
+          errorData.error || `Error en la solicitud: ${response.status}`
+        );
+      }
+
+      // Convertir la respuesta a JSON y devolverla
+      const data = await response.json();
+      console.log("Respuesta de la solicitud:", data); // Log de depuración
+      return data;
+    } catch (err) {
+      // Log adicional en caso de error
+      console.error("Error al realizar la solicitud autenticada:", err.message);
+      throw err; // Re-lanzar el error para manejarlo en el componente
+    }
+  };
+
   return (
     <UserContext.Provider
       value={{
@@ -57,7 +90,8 @@ export const UserProvider = ({ children }) => {
         login,
         logout,
         passwordResetCompleted,
-        setPasswordResetCompleted, // Exponemos el setter
+        setPasswordResetCompleted,
+        authenticatedFetch,
       }}
     >
       {children}

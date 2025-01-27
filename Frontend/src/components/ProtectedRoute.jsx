@@ -12,6 +12,7 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
+  console.log("Ruta protegida accedida. Usuario:", user);
   return children; // Si hay usuario, renderiza los hijos
 };
 

@@ -16,6 +16,8 @@ import PasswordRecoveryForm from "./components/PasswordRecoveryForm";
 import PasswordRecoverySuccess from "./components/PasswordRecoverySuccess";
 import PasswordResetForm from "./components/PasswordResetForm";
 import PasswordResetSuccess from "./components/PasswordResetSuccess";
+import EventDetail from "./components/EventDetail";
+import EventList from "./components/EventList";
 
 import "./App.css"; // Importa tus estilos si es necesario
 
@@ -53,9 +55,29 @@ const App = () => {
           {/* Ruta para validación de usuario */}
           <Route path="/validate-user" element={<UserValidationForm />} />
 
-          {/* Ruta para meetups, protegida */}
+          {/* Ruta para lista de meetups, protegida */}
           <Route
             path="/"
+            element={
+              <ProtectedRoute>
+                <EventList />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Ruta para detalles de un evento (protegida) */}
+          <Route
+            path="/events/:id"
+            element={
+              <ProtectedRoute>
+                <EventDetail />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Ruta para meetups, protegida */}
+          <Route
+            path="/meetups/form"
             element={
               <ProtectedRoute>
                 <>
