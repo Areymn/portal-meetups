@@ -11,6 +11,7 @@ const EventList = () => {
   const [error, setError] = useState("");
   const [filterCity, setFilterCity] = useState(""); // Estado para el filtro de ciudad
   const [filterTheme, setFilterTheme] = useState(""); // Estado para el filtro por temática
+  const [filterDate, setFilterDate] = useState("all"); // Estado para el filtro de fechas
   const [sortOrder, setSortOrder] = useState("date"); // Estado para la ordenación
   const { authenticatedFetch } = useUserContext();
 
@@ -87,7 +88,18 @@ const EventList = () => {
       const matchesTheme = filterTheme
         ? event.themeId === parseInt(filterTheme)
         : true;
-      return matchesCity && matchesTheme;
+
+      // Filtro de fechas
+      const today = new Date();
+      const eventDate = new Date(event.date);
+      const matchesDate =
+        filterDate === "past"
+          ? eventDate < today
+          : filterDate === "future"
+          ? eventDate >= today
+          : true;
+
+      return matchesCity && matchesTheme && matchesDate;
     })
     .sort((a, b) => {
       if (sortOrder === "date") return new Date(a.date) - new Date(b.date);
@@ -132,6 +144,19 @@ const EventList = () => {
                 {theme.name}
               </option>
             ))}
+          </select>
+        </div>
+
+        <div className="filter-group">
+          <label htmlFor="dateFilter">Filtrar por fecha:</label>
+          <select
+            id="dateFilter"
+            onChange={(e) => setFilterDate(e.target.value)}
+            value={filterDate}
+          >
+            <option value="all">Todos</option>
+            <option value="past">Pasados</option>
+            <option value="future">Futuros</option>
           </select>
         </div>
 
