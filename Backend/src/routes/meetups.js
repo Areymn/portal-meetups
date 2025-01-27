@@ -16,6 +16,7 @@ import { authenticateAdmin } from "../middlewares/authAdmin.js";
 import { authenticateUser } from "../middlewares/authMiddleware.js";
 //IMPORTA RATE
 import { rateEvent } from "../controllers/meetups/rateEvent.js";
+import { getCities } from "../controllers/meetups/detailEvent.js";
 
 const router = Router(); // Crear una instancia del router de Express
 
@@ -31,6 +32,8 @@ router.put("/edit/:id", authenticateUser, editEvent);
 router.post("/signup", authenticateUser, signupEvent);
 
 router.post("/admin/validate", authenticateAdmin, validateEvent);
+
+router.get("/cities", getCities);
 
 router.get("/", getEvents);
 
