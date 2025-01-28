@@ -442,9 +442,60 @@ const passwordRecovery = async (req, res) => {
 // };
 
 //Este método se encargará de validar el token de recuperación y actualizar la contraseña del usuario.
+// Función común para actualizar la contraseña del usuario
+const updateUserPassword = async (userId, newPassword) => {
+  const pool = await getPool();
+  const hashedPassword = await hash(newPassword, 10);
+  await pool.query("UPDATE users SET password = ? WHERE id = ?", [
+    hashedPassword,
+    userId,
+  ]);
+};
+
+const changePassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        error: "Debes proporcionar la contraseña actual y la nueva contraseña.",
+      });
+    }
+
+    const pool = await getPool();
+    const [users] = await pool.query(
+      "SELECT password FROM users WHERE id = ?",
+      [id]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado." });
+    }
+
+    const user = users[0];
+
+    const isPasswordValid = await compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Contraseña actual incorrecta." });
+    }
+
+    await updateUserPassword(id, newPassword);
+
+    console.log(`✅ Contraseña cambiada con éxito para el usuario ID ${id}`);
+
+    res.status(200).json({
+      message: "Contraseña cambiada correctamente.",
+      success: true,
+    });
+  } catch (error) {
+    console.error("Error en changePassword:", error.message);
+    res.status(500).json({ error: "Error interno del servidor." });
+  }
+};
+
 const resetPassword = async (req, res) => {
   try {
-    // Validar el esquema de entrada
     const schema = Joi.object({
       token: Joi.string().required(),
       newPassword: Joi.string().min(6).required(),
@@ -457,7 +508,6 @@ const resetPassword = async (req, res) => {
 
     const { token, newPassword } = value;
 
-    // Verificar y decodificar el token
     let payload;
     try {
       payload = verify(token, JWT_SECRET);
@@ -465,18 +515,14 @@ const resetPassword = async (req, res) => {
       return res.status(400).json({ error: "Token inválido o expirado." });
     }
 
-    // Validar que el token contiene un email válido
-    if (!payload.email) {
-      return res
-        .status(400)
-        .json({ error: "El token no contiene un email válido." });
+    if (!payload.userId || !payload.email) {
+      return res.status(400).json({ error: "Token inválido." });
     }
 
-    const { userId, email } = payload; // Extraer email y userId del token
+    const { userId, email } = payload;
 
+    // Verificar si el usuario existe antes de actualizar la contraseña
     const pool = await getPool();
-
-    // Verificar si el usuario aún existe en la base de datos
     const [users] = await pool.query(
       "SELECT id FROM users WHERE id = ? AND email = ?",
       [userId, email]
@@ -488,18 +534,12 @@ const resetPassword = async (req, res) => {
         .json({ error: "El usuario asociado al token no fue encontrado." });
     }
 
-    // Encriptar y actualizar la nueva contraseña
-    const hashedPassword = await hash(newPassword, 10);
-    await pool.query("UPDATE users SET password = ? WHERE id = ?", [
-      hashedPassword,
-      userId,
-    ]);
+    // Actualizar la contraseña utilizando la función común
+    await updateUserPassword(userId, newPassword);
 
-    console.log(
-      `Contraseña restablecida para el usuario con ID: ${userId} y Email: ${email}`
-    );
+    console.log(`Contraseña restablecida para el usuario con ID: ${userId}`);
 
-    // Enviar correo de confirmación de restablecimiento
+    // Enviar correo de confirmación de restablecimiento (no modificar)
     let testAccount = await nodemailer.createTestAccount();
     let transporter = nodemailer.createTransport({
       host: testAccount.smtp.host,
@@ -530,7 +570,6 @@ const resetPassword = async (req, res) => {
       }
     });
 
-    // Respuesta de éxito al cliente
     res.status(200).json({ message: "Contraseña actualizada correctamente." });
   } catch (err) {
     console.error("Error en resetPassword:", err.message);
@@ -538,55 +577,73 @@ const resetPassword = async (req, res) => {
   }
 };
 
-export const sendPasswordResetNotification = async (req, res) => {
-  const { email } = req.body;
-
-  if (!email) {
-    return res.status(400).json({ error: "Email requerido" });
-  }
-
-  try {
-    console.log(`Notificación enviada al correo: ${email}`);
-    res.status(200).json({ message: "Notificación enviada exitosamente." });
-  } catch (error) {
-    console.error("Error al enviar la notificación:", error.message);
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-};
-
 // ------------------------- ACTUALIZAR PERFIL DE USUARIO-------------------------
-
 const updateUserProfile = async (req, res) => {
   try {
-    const { id } = req.params; // Obtiene el ID desde los parámetros de la URL
-    console.log("User ID:", id); // Para depuración
+    const { id } = req.params;
+    const { name, last_name, email, avatar, currentPassword } = req.body;
 
-    const updates = req.body; // Datos enviados en el cuerpo de la solicitud
-    console.log("Actualizaciones recibidas:", updates); // Verifica el cuerpo recibido
-
-    console.log("Usuarios disponibles:", users);
-    // Validar que el usuario existe
-    const user = users.find((user) => user.id === id);
-    console.log("User encontrado:", user); // Para verificar si el usuario existe
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    // Validación básica
+    if (!currentPassword) {
+      return res
+        .status(400)
+        .json({ error: "Debes proporcionar tu contraseña actual." });
     }
 
-    // Actualizar los campos permitidos
-    Object.keys(updates).forEach((key) => {
-      if (["name", "email", "bio"].includes(key)) {
-        user[key] = updates[key];
-      }
-    });
+    const pool = await getPool();
 
-    // Responder con el usuario actualizado
-    res.status(200).json({ message: "Profile updated", user });
+    // Obtener el usuario actual
+    const [users] = await pool.query("SELECT * FROM users WHERE id = ?", [id]);
+
+    if (users.length === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado." });
+    }
+
+    const user = users[0];
+
+    // Verificar la contraseña actual antes de actualizar datos
+    const isPasswordValid = await compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Contraseña actual incorrecta." });
+    }
+
+    // Construcción dinámica de la consulta SQL para actualizar solo los campos enviados
+    const updates = [];
+    const values = [];
+
+    if (name) {
+      updates.push("name = ?");
+      values.push(name);
+    }
+    if (last_name) {
+      updates.push("last_name = ?");
+      values.push(last_name);
+    }
+    if (email) {
+      updates.push("email = ?");
+      values.push(email);
+    }
+    if (avatar) {
+      updates.push("avatar = ?");
+      values.push(avatar);
+    }
+
+    if (updates.length > 0) {
+      values.push(id);
+      const updateQuery = `UPDATE users SET ${updates.join(", ")} WHERE id = ?`;
+      await pool.query(updateQuery, values);
+
+      console.log(
+        `✅ Perfil actualizado para el usuario ID ${id}. Campos modificados: ${updates.join(
+          ", "
+        )}`
+      );
+    }
+
+    res.status(200).json({ message: "Perfil actualizado correctamente." });
   } catch (error) {
-    console.error("Error interno:", error); // Muestra el error completo en la consola
-    res.status(500).json({
-      message: "Internal server error",
-      error: error.message || "Unknown error occurred",
-    });
+    console.error("Error en updateUserProfile:", error.message);
+    res.status(500).json({ error: "Error interno del servidor." });
   }
 };
 
@@ -595,7 +652,9 @@ export default {
   registerUser,
   loginUser,
   passwordRecovery,
+  updateUserPassword,
+  changePassword,
   resetPassword,
-  sendPasswordResetNotification,
+  // sendPasswordResetNotification,
   updateUserProfile,
 };

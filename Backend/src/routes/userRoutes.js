@@ -13,7 +13,8 @@ import {
   validateUserCode,
 } from "../controllers/userController.js";
 
-import upload from "../middlewares/uploadMiddleware.js";
+// import upload from "../middlewares/uploadMiddleware.js";
+import { handleFileUpload } from "../middlewares/uploadMiddleware.js";
 
 const router = Router(); // Crear una instancia del router de Express
 
@@ -38,9 +39,15 @@ router.post("/password-recovery", userController.passwordRecovery);
 router.post("/reset-password", userController.resetPassword);
 
 router.post(
-  "/password-reset-notification",
-  userController.sendPasswordResetNotification
+  "/:id/change-password",
+  authenticateUser,
+  userController.changePassword
 );
+
+// router.post(
+//   "/password-reset-notification",
+//   userController.sendPasswordResetNotification
+// );
 
 // // Ruta cambio de contraseña con autenticación
 // router.post(
@@ -69,18 +76,7 @@ router.patch(
 );
 
 // Ruta para subir una foto de perfil con autenticación
-router.post(
-  "/profile/upload",
-  authenticateUser,
-  upload.single("photo"),
-  (req, res) => {
-    if (req.file) {
-      res.send(`Foto subida con éxito: ${req.file.path}`);
-    } else {
-      res.status(400).send("No se subió ningún archivo.");
-    }
-  }
-);
+router.post("/profile/upload", authenticateUser, handleFileUpload);
 
 // ------------------------- EXPORTAR RUTAS -------------------------
 export default router;
