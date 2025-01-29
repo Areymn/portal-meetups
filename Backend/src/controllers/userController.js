@@ -588,12 +588,9 @@ const updateUserProfile = async (req, res) => {
 
     if (!currentPassword) {
       console.error("⚠️ Falta la contraseña actual.");
-      return res
-        .status(400)
-        .json({
-          error:
-            "Debes ingresar tu contraseña actual para actualizar tu perfil.",
-        });
+      return res.status(400).json({
+        error: "Debes ingresar tu contraseña actual para actualizar tu perfil.",
+      });
     }
 
     const pool = await getPool();
@@ -650,9 +647,40 @@ const updateUserProfile = async (req, res) => {
       );
     }
 
+    if (avatar) {
+      updates.push("avatar = ?");
+      values.push(avatar);
+    }
+
     res.status(200).json({ message: "Perfil actualizado correctamente." });
   } catch (error) {
     console.error("❌ Error en updateUserProfile:", error.message);
+    res.status(500).json({ error: "Error interno del servidor." });
+  }
+};
+
+// obtener datos del usuario
+
+export const getUserProfile = async (req, res) => {
+  console.log("📡 Recibiendo solicitud en getUserProfile...");
+
+  try {
+    console.log("📡 Solicitando datos del usuario...");
+    const pool = await getPool();
+    const [users] = await pool.query(
+      "SELECT id, username, email, avatar FROM users WHERE id = ?",
+      [req.user.user_id]
+    );
+
+    if (users.length === 0) {
+      console.error("❌ Usuario no encontrado.");
+      return res.status(404).json({ error: "Usuario no encontrado." });
+    }
+
+    console.log("✅ Datos del usuario encontrados:", users[0]);
+    res.json(users[0]); // Enviar datos al frontend
+  } catch (error) {
+    console.error("❌ Error en getUserProfile:", error.message);
     res.status(500).json({ error: "Error interno del servidor." });
   }
 };
@@ -667,4 +695,5 @@ export default {
   resetPassword,
   // sendPasswordResetNotification,
   updateUserProfile,
+  getUserProfile,
 };

@@ -12,7 +12,6 @@ export const authenticateUser = (req, res, next) => {
   try {
     console.log("📡 Middleware de autenticación activado.");
 
-    // Extraer el token del encabezado Authorization
     const authHeader = req.headers["authorization"];
     console.log("🔑 Encabezado de autorización recibido:", authHeader);
 
@@ -23,7 +22,7 @@ export const authenticateUser = (req, res, next) => {
 
     const parts = authHeader.split(" ");
     if (parts.length !== 2 || parts[0] !== "Bearer") {
-      console.error("❌ Formato de token inválido. Debe ser 'Bearer <token>'.");
+      console.error("❌ Formato de token inválido. Debe ser 'Bearer <token>'");
       return res
         .status(401)
         .json({ error: "Formato de token inválido. Usa 'Bearer <token>'." });
@@ -35,7 +34,12 @@ export const authenticateUser = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log("✅ Token verificado:", decoded);
 
-    req.user = decoded;
+    // Normalizar `req.user` para que tenga `id` y `user_id`
+    req.user = {
+      ...decoded,
+      id: decoded.user_id, // 👈 Normaliza `id` para evitar errores en otros archivos
+    };
+
     console.log("🛠️ Usuario autenticado en el middleware:", req.user);
 
     next();

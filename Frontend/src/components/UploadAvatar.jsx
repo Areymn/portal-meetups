@@ -2,48 +2,59 @@ import React, { useState } from "react";
 import { useUserContext } from "../context/UserContext";
 
 const UploadAvatar = () => {
-  const { user, setUser } = useUserContext();
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const { user, token, setUser } = useUserContext(); // Asegurar que token existe
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [preview, setPreview] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleFileChange = (event) => {
-    const selectedFile = event.target.files[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setPreview(URL.createObjectURL(selectedFile));
+  const handleFileChange = (e) => {
+    if (e.target.files.length > 0) {
+      setSelectedFile(e.target.files[0]);
+      setPreview(URL.createObjectURL(e.target.files[0]));
     }
   };
 
   const handleUpload = async () => {
-    if (!file) return;
+    if (!selectedFile) {
+      alert("Por favor selecciona una imagen.");
+      return;
+    }
 
     setLoading(true);
+
     const formData = new FormData();
-    formData.append("photo", file);
+    formData.append("photo", selectedFile);
 
     try {
+      console.log("🔄 Enviando archivo...");
+      console.log("🛠️ Token antes de la solicitud:", token); // Agregar log para verificar
+
       const response = await fetch(
         "http://localhost:5000/api/users/profile/upload",
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${user.token}`,
+            Authorization: `Bearer ${token}`, // 👈 Enviar token correctamente
           },
           body: formData,
         }
       );
 
       const data = await response.json();
+      console.log("✅ Respuesta del servidor:", data);
+
       if (response.ok) {
-        setUser({ ...user, avatar: data.filePath });
-        alert("Foto de perfil actualizada con éxito");
+        setUser((prevUser) => ({
+          ...prevUser,
+          avatar: data.filePath || "/default-avatar.png",
+        }));
+        alert("✅ Foto subida con éxito.");
       } else {
-        alert(`Error: ${data.error}`);
+        throw new Error(data.error || "Error al subir la foto");
       }
     } catch (error) {
-      console.error("Error al subir la foto", error);
-      alert("Error al subir la foto");
+      console.error("❌ Error al subir la foto:", error.message);
+      alert(`Error: ${error.message}`);
     } finally {
       setLoading(false);
     }

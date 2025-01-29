@@ -19,6 +19,9 @@ import { handleFileUpload } from "../middlewares/uploadMiddleware.js";
 const router = Router(); // Crear una instancia del router de Express
 
 // ------------------------- RUTAS DE USUARIOS -------------------------
+//Obtener datos del usuario
+console.log("📡 Cargando ruta GET users/me...");
+router.get("users/me", authenticateUser, userController.getUserProfile);
 
 // Ruta de registro de usuarios
 router.post("/register", userController.registerUser);

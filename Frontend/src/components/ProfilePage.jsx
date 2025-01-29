@@ -8,6 +8,11 @@ import { useUserContext } from "../context/UserContext";
 
 const ProfilePage = () => {
   const { user } = useUserContext();
+  if (!user) return <p>Cargando perfil...</p>;
+
+  const avatarSrc = user.avatar
+    ? `http://localhost:5000${user.avatar}`
+    : "/default-avatar.png";
 
   const handleDeleteAccount = () => {
     const confirmDelete = window.confirm(
@@ -24,8 +29,8 @@ const ProfilePage = () => {
       <h1 className="profile-title">Perfil de Usuario</h1>
       <div className="profile-info">
         <img
-          src={user.avatar || "/default-avatar.png"}
-          alt="Avatar"
+          src={avatarSrc}
+          alt="Avatar de usuario"
           className="profile-avatar"
         />
         <h2>
@@ -39,7 +44,9 @@ const ProfilePage = () => {
       <ChangePasswordForm />
 
       <div className="">
-        <button className="delete-account-btn">Eliminar Cuenta</button>
+        <button onClick={handleDeleteAccount} className="delete-account-btn">
+          Eliminar Cuenta
+        </button>
       </div>
     </div>
   );
