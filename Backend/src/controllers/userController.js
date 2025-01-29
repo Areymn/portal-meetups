@@ -120,7 +120,6 @@ const registerUser = async (req, res) => {
 // Controlador para el login de usuarios
 const loginUser = async (req, res) => {
   try {
-    // Validar los datos del body
     const schema = Joi.object({
       email: Joi.string().email().required(),
       password: Joi.string().min(6).required(),
@@ -133,11 +132,6 @@ const loginUser = async (req, res) => {
 
     const { email, password } = value;
     const pool = await getPool();
-    // // Buscar el usuario en la base de datos simulada
-    // const user = users.find((u) => u.email === email);
-    // if (!user) {
-    //   return res.status(400).json({ error: "El usuario no existe." });
-    // }
     const [users] = await pool.query("SELECT * FROM users WHERE email = ?", [
       email,
     ]);
@@ -146,32 +140,35 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ error: "El usuario no existe." });
     }
     const user = users[0];
-    // Verificar la contraseña encriptada
+
     const isPasswordValid = await compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Contraseña incorrecta." });
     }
 
-    // Verificar si el usuario tiene la cuenta activada antes de generar el token
     if (!user.is_active) {
-      return res.status(403).json({
-        error:
-          "Tu cuenta aún no ha sido activada. Verifica tu correo para activarla.",
-      });
+      return res
+        .status(403)
+        .json({ error: "Tu cuenta aún no ha sido activada." });
     }
 
-    // Generar un token JWT con una expiracion de 1 hora
     const token = sign(
       { user_id: user.id, email: user.email, username: user.username },
       JWT_SECRET,
-      { expiresIn: "1h" } // El token expira en 1 hora
+      { expiresIn: "1h" }
     );
 
-    // Responder con el token
     res.status(200).json({
       message: "Login exitoso",
       token,
-      username: user.username, // Incluye el nombre de usuario
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        name: user.name,
+        last_name: user.last_name,
+        avatar: user.avatar,
+      },
     });
   } catch (err) {
     console.error("Error en loginUser:", err.message);
@@ -579,35 +576,48 @@ const resetPassword = async (req, res) => {
 
 // ------------------------- ACTUALIZAR PERFIL DE USUARIO-------------------------
 const updateUserProfile = async (req, res) => {
+  console.log(
+    "📡 Recibiendo solicitud de actualización de perfil para usuario ID:",
+    req.params.id
+  );
+  console.log("🛠️ Datos recibidos en la solicitud:", req.body);
+
   try {
     const { id } = req.params;
     const { name, last_name, email, avatar, currentPassword } = req.body;
 
-    // Validación básica
     if (!currentPassword) {
+      console.error("⚠️ Falta la contraseña actual.");
       return res
         .status(400)
-        .json({ error: "Debes proporcionar tu contraseña actual." });
+        .json({
+          error:
+            "Debes ingresar tu contraseña actual para actualizar tu perfil.",
+        });
     }
 
     const pool = await getPool();
-
-    // Obtener el usuario actual
     const [users] = await pool.query("SELECT * FROM users WHERE id = ?", [id]);
 
     if (users.length === 0) {
+      console.error("❌ Usuario no encontrado.");
       return res.status(404).json({ error: "Usuario no encontrado." });
     }
 
     const user = users[0];
 
-    // Verificar la contraseña actual antes de actualizar datos
+    console.log("🔍 Comparando contraseña actual...");
     const isPasswordValid = await compare(currentPassword, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: "Contraseña actual incorrecta." });
+      console.error("❌ Contraseña actual incorrecta.");
+      return res
+        .status(401)
+        .json({ error: "La contraseña actual es incorrecta." });
     }
 
-    // Construcción dinámica de la consulta SQL para actualizar solo los campos enviados
+    console.log("✅ Contraseña verificada correctamente.");
+
+    // Construcción de la consulta de actualización
     const updates = [];
     const values = [];
 
@@ -642,7 +652,7 @@ const updateUserProfile = async (req, res) => {
 
     res.status(200).json({ message: "Perfil actualizado correctamente." });
   } catch (error) {
-    console.error("Error en updateUserProfile:", error.message);
+    console.error("❌ Error en updateUserProfile:", error.message);
     res.status(500).json({ error: "Error interno del servidor." });
   }
 };

@@ -1,5 +1,3 @@
-// src/context/UserContext.jsx
-
 import React, { createContext, useState, useContext, useEffect } from "react";
 
 const UserContext = createContext();
@@ -7,79 +5,89 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState("");
-  const [passwordResetCompleted, setPasswordResetCompleted] = useState(false); // Nuevo estado
+  const [passwordResetCompleted, setPasswordResetCompleted] = useState(false);
 
-  // Leer el token y el usuario desde localStorage al iniciar la aplicación
+  // 🔄 Cargar usuario y token desde localStorage al iniciar la aplicación
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     const savedToken = localStorage.getItem("token");
-    console.log(
-      "Cargando usuario y token desde localStorage:",
-      savedUser,
-      savedToken
-    );
+
+    console.log("🔍 Cargando datos desde localStorage...");
+    console.log("📦 Usuario almacenado:", savedUser);
+    console.log("🔑 Token almacenado:", savedToken);
+
     if (savedUser && savedToken) {
-      setUser(JSON.parse(savedUser));
-      setToken(savedToken);
-      console.log("Usuario cargado:", savedUser);
+      try {
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
+        setToken(savedToken);
+        console.log(
+          "✅ Usuario y token cargados en `UserContext`:",
+          parsedUser,
+          savedToken
+        );
+      } catch (error) {
+        console.error(
+          "❌ Error al parsear usuario desde `localStorage`:",
+          error
+        );
+      }
     } else {
-      console.log("No se encontró usuario o token.");
+      console.log("⚠️ No se encontraron usuario o token en `localStorage`.");
     }
   }, []);
 
-  const login = (userData, userToken) => {
-    // Guardar el usuario y el token en el estado
+  // ✅ Login con persistencia en localStorage
+  const login = async (userData, userToken) => {
+    console.log("🔐 Usuario recibido en login:", userData);
+
     setUser(userData);
     setToken(userToken);
-    // Guardar los datos en localStorage
     localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("token", userToken);
-    console.log("Usuario guardado en localStorage:", userData);
-    console.log("Token guardado en localStorage:", userToken);
+
+    console.log("✅ Usuario guardado en localStorage correctamente.");
   };
 
+  // 🔓 Logout: Elimina usuario y token
   const logout = () => {
-    // Limpiar el estado
+    console.log("🚪 Cerrando sesión...");
     setUser(null);
     setToken("");
-    setPasswordResetCompleted(false); // Reinicia el estado de restablecimiento de contraseña
-
-    // Eliminar los datos de localStorage
+    setPasswordResetCompleted(false);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
   };
 
-  // Nuevo método para realizar solicitudes autenticadas al backend
+  // 📡 Fetch autenticado con el token desde localStorage
   const authenticatedFetch = async (url, options = {}) => {
-    try {
-      const headers = {
-        ...options.headers,
-        Authorization: `Bearer ${token}`, // Añade el token al encabezado
-        "Content-Type": "application/json",
-      };
-      const response = await fetch(url, { ...options, headers });
+    const storedToken = localStorage.getItem("token");
+    const headers = {
+      ...options.headers,
+      Authorization: `Bearer ${token || storedToken}`,
+      "Content-Type": "application/json",
+    };
 
-      // Si la respuesta no es "ok", manejar el error
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error(
-          `Error en la solicitud (${response.status}):`,
-          errorData.error || errorData
-        );
-        throw new Error(
-          errorData.error || `Error en la solicitud: ${response.status}`
-        );
-      }
+    console.log("🔄 Enviando solicitud con headers:", headers);
 
-      // Convertir la respuesta a JSON y devolverla
-      const data = await response.json();
-      console.log("Respuesta de la solicitud:", data); // Log de depuración
-      return data;
-    } catch (err) {
-      // Log adicional en caso de error
-      console.error("Error al realizar la solicitud autenticada:", err.message);
-      throw err; // Re-lanzar el error para manejarlo en el componente
+    const response = await fetch(url, { ...options, headers });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("❌ Error en la solicitud:", errorData);
+      throw new Error(errorData.error || `Error: ${response.status}`);
     }
+
+    return response.json();
+  };
+
+  // 🔄 Actualizar usuario en el contexto y localStorage
+  const updateUser = (updatedUserData) => {
+    setUser((prevUser) => {
+      const newUser = { ...prevUser, ...updatedUserData };
+      localStorage.setItem("user", JSON.stringify(newUser));
+      return newUser;
+    });
   };
 
   return (
@@ -89,6 +97,7 @@ export const UserProvider = ({ children }) => {
         token,
         login,
         logout,
+        updateUser,
         passwordResetCompleted,
         setPasswordResetCompleted,
         authenticatedFetch,
