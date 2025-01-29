@@ -3,12 +3,15 @@ import { Navigate } from "react-router-dom";
 import { useUserContext } from "../context/UserContext"; // Asegúrate de que la ruta al contexto sea correcta
 
 const ProtectedRoute = ({ children }) => {
-  const { user } = useUserContext(); // Accede al usuario desde el contexto
-  console.log("Ruta protegida accedida. Usuario:", user);
+  const { user, token } = useUserContext(); // Accede al usuario desde el contexto
 
-  if (!user) {
+  console.log("Verificando acceso a ruta protegida...");
+  console.log("Usuario:", user);
+  console.log("Token:", token);
+
+  if (!user || !user.email || !token) {
     // Si no hay usuario autenticado, redirige al login
-    console.log("Redirigiendo al login porque el usuario no está autenticado.");
+    console.log("Acceso denegado, redirigiendo al login...");
     return <Navigate to="/login" replace />;
   }
 

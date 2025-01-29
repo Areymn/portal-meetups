@@ -1,20 +1,17 @@
-// src/components/LoginForm.jsx
-
-import React, { useState } from "react"; // Hook que permite manejar el estado dentro del componente
-import { useNavigate } from "react-router-dom"; // Hook para redirigir
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { useUserContext } from "../context/UserContext";
 
 const LoginForm = () => {
-  const { login } = useUserContext(); // Obtenemos la función login del contexto
-  const [email, setEmail] = useState(""); // Estado para el correo electrónico
-  const [password, setPassword] = useState(""); // Estado para la contraseña
-  const navigate = useNavigate(); // Hook para redirigir
+  const { login } = useUserContext();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      // Realizamos la solicitud al backend
       const response = await fetch("http://localhost:5000/api/users/login", {
         method: "POST",
         headers: {
@@ -26,50 +23,64 @@ const LoginForm = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Guardamos el token en el contexto
-        const loggedInUser = data.username || email; // Nombre de usuario recibido del backend o email usado
-        login({ username: loggedInUser, email: data.email }, data.token);
-
-        console.log("Token recibido:", data.token);
-        console.log("Usuario logueado:", loggedInUser);
-
-        // Redirige al usuario a la lista de eventos después del login
-        navigate("/");
+        login(data.user, data.token);
+        navigate("/"); // ✅ Redirige a EventList después de iniciar sesión
       } else {
-        // Manejamos errores del backend
-        console.error("Error en el inicio de sesión:", data.error);
         alert(data.error || "Error al iniciar sesión");
       }
     } catch (error) {
-      console.error("Error en la solicitud:", error);
       alert("Ocurrió un error. Inténtalo de nuevo.");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="email">Correo Electrónico</label>
-        <input
-          type="email"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="password">Contraseña</label>
-        <input
-          type="password"
-          id="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-      </div>
-      <button type="submit">Iniciar Sesión</button>
-    </form>
+    <div className="login-container">
+      <h2>Iniciar Sesión</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="email">Correo Electrónico</label>
+          <input
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="password">Contraseña</label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        {/* ✅ Agregado enlace para recuperar contraseña */}
+        <div>
+          <Link
+            to="/password-recovery"
+            style={{
+              display: "block",
+              marginBottom: "10px",
+              color: "#007bff",
+              textDecoration: "none",
+            }}
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </div>
+        <button type="submit">Iniciar Sesión</button>
+      </form>
+      {/* ✅ Enlace para registrarse debajo del formulario */}
+      <p style={{ marginTop: "10px" }}>
+        ¿No tienes cuenta?{" "}
+        <Link to="/register" style={{ color: "#007bff" }}>
+          Regístrate aquí
+        </Link>
+      </p>
+    </div>
   );
 };
 

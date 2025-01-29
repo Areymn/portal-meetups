@@ -26,11 +26,14 @@ app.use(json()); // Parsear JSON en el body de las solicitudes
 // Configurar CORS para permitir solicitudes desde cualquier origen
 app.use(
   cors({
-    origin: "*", // Permite todas las solicitudes (puedes restringirlo a dominios específicos)
-    methods: ["GET", "POST", "PUT", "DELETE"], // Métodos HTTP permitidos
-    allowedHeaders: ["Content-Type", "Authorization"], // Headers permitidas
+    origin: "http://localhost:5173",
+    credentials: true,
   })
-);
+); // Permite todas las solicitudes (puedes restringirlo a dominios específicos)
+//     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // Métodos HTTP permitidos
+//     allowedHeaders: ["Content-Type", "Authorization"], // Headers permitidas
+//   })
+// );
 
 // Middleware para servir archivos estaticos
 
