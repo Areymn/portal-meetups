@@ -4,6 +4,7 @@ import { dirname } from "path";
 import { fileURLToPath } from "url";
 import multer from "multer";
 import path from "path";
+import getPool from "../db/getPool.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -52,7 +53,13 @@ const upload = multer({
 
 // Middleware personalizado para manejar errores de subida
 const handleFileUpload = (req, res, next) => {
-  upload(req, res, (err) => {
+  // 💾 Guardar el usuario autenticado antes de llamar a multer
+  const authenticatedUser = req.user;
+
+  upload(req, res, async (err) => {
+    // 🚨 Si multer reemplaza `req`, lo restauramos
+    req.user = authenticatedUser;
+
     if (err) {
       console.error(`❌ Error en la subida de archivo: ${err.message}`);
       return res.status(400).json({ error: err.message });
@@ -63,15 +70,38 @@ const handleFileUpload = (req, res, next) => {
       return res.status(400).json({ error: "No se subió ningún archivo." });
     }
 
-    console.log(
-      `✅ Foto subida con éxito para el usuario ID: ${req.user.user_id}`
-    );
-    console.log(`📂 Ruta del archivo: ${req.file.path}`);
+    console.log(`✅ Foto subida con éxito: ${req.file.path}`);
+    console.log("🔍 Verificando `req.user` después de restaurar:", req.user);
 
-    res.status(200).json({
-      message: "Foto subida con éxito.",
-      filePath: req.file.path,
-    });
+    if (!req.user || !req.user.user_id) {
+      console.error(
+        "❌ Error: No se encontró un usuario autenticado en `req.user` después de la subida."
+      );
+      return res.status(401).json({ error: "Usuario no autenticado." });
+    }
+
+    // ✅ Actualizar avatar en la base de datos
+    try {
+      const pool = await getPool();
+      await pool.query("UPDATE users SET avatar = ? WHERE id = ?", [
+        req.file.path,
+        req.user.user_id, // 🔄 Verificar que el ID es correcto
+      ]);
+
+      console.log(
+        `🔄 Avatar actualizado en la BD para el usuario ID: ${req.user.user_id}`
+      );
+      res.status(200).json({
+        message: "Foto subida y avatar actualizado con éxito.",
+        filePath: req.file.path,
+      });
+    } catch (error) {
+      console.error(
+        "❌ Error al actualizar avatar en la base de datos:",
+        error
+      );
+      res.status(500).json({ error: "Error interno al actualizar el avatar." });
+    }
   });
 };
 

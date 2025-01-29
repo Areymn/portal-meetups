@@ -37,6 +37,26 @@ export const UserProvider = ({ children }) => {
     }
   }, []);
 
+  // ✅ Nueva función para recuperar datos actualizados del usuario
+  const fetchUserData = async () => {
+    try {
+      console.log("📡 Solicitando datos del usuario...");
+      const response = await fetch("http://localhost:5000/api/me", { headers });
+
+      console.log("🔄 Respuesta del servidor en `fetchUserData`:", response);
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setUser(data);
+      console.log("✅ Datos de usuario cargados correctamente:", data);
+    } catch (error) {
+      console.error("❌ Error al recuperar usuario:", error);
+    }
+  };
+
   // ✅ Login con persistencia en localStorage
   const login = async (userData, userToken) => {
     console.log("🔐 Usuario recibido en login:", userData);
@@ -47,6 +67,9 @@ export const UserProvider = ({ children }) => {
     localStorage.setItem("token", userToken);
 
     console.log("✅ Usuario guardado en localStorage correctamente.");
+
+    // 🔄 Al iniciar sesión, obtener datos actualizados
+    fetchUserData();
   };
 
   // 🔓 Logout: Elimina usuario y token
@@ -62,13 +85,27 @@ export const UserProvider = ({ children }) => {
   // 📡 Fetch autenticado con el token desde localStorage
   const authenticatedFetch = async (url, options = {}) => {
     const storedToken = localStorage.getItem("token");
+    const finalToken = token || storedToken;
+
+    console.log("🔍 Token obtenido para authenticatedFetch:", finalToken);
+
+    if (!finalToken) {
+      console.error("❌ ERROR: No hay token disponible para la solicitud.");
+      throw new Error("No hay token de autenticación.");
+    }
+
     const headers = {
       ...options.headers,
-      Authorization: `Bearer ${token || storedToken}`,
-      "Content-Type": "application/json",
+      Authorization: `Bearer ${finalToken}`,
     };
 
-    console.log("🔄 Enviando solicitud con headers:", headers);
+    // ❗ Si el body es JSON, asegurar que el Content-Type esté correctamente definido
+    if (options.body && !(options.body instanceof FormData)) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    console.log("📡 Enviando solicitud a:", url);
+    console.log("📜 Headers enviados:", headers);
 
     const response = await fetch(url, { ...options, headers });
 
@@ -84,7 +121,10 @@ export const UserProvider = ({ children }) => {
   // 🔄 Actualizar usuario en el contexto y localStorage
   const updateUser = (updatedUserData) => {
     setUser((prevUser) => {
-      const newUser = { ...prevUser, ...updatedUserData };
+      const newUser = {
+        ...prevUser,
+        avatar: updatedUserData.avatar || "/default-avatar.png", // Si no tiene avatar, usa el por defecto
+      };
       localStorage.setItem("user", JSON.stringify(newUser));
       return newUser;
     });
@@ -95,12 +135,15 @@ export const UserProvider = ({ children }) => {
       value={{
         user,
         token,
+        setToken,
+        setUser,
         login,
         logout,
         updateUser,
         passwordResetCompleted,
         setPasswordResetCompleted,
         authenticatedFetch,
+        fetchUserData, // 🔄 Se expone para poder usarse en otros componentes
       }}
     >
       {children}

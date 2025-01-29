@@ -18,6 +18,13 @@ import { logger } from "./middlewares/logger.js";
 
 const app = express(); // Crear una instancia de la aplicación Express
 
+app.use((req, res, next) => {
+  console.log(`📡 Nueva solicitud recibida: ${req.method} ${req.url}`);
+  console.log("📜 Headers de la solicitud:", req.headers);
+  console.log("📦 Cuerpo de la solicitud:", req.body);
+  next();
+});
+
 // ------------------------- MIDDLEWARES BÁSICOS -------------------------
 app.use(logger); //Archivos estaticos
 
@@ -46,6 +53,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Intenta resolver la ruta del archivo `events.js`
 console.log("Probando ruta hacia events.js...");
 try {
