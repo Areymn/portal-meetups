@@ -11,7 +11,7 @@ const ProfilePage = () => {
   if (!user) return <p>Cargando perfil...</p>;
 
   const avatarSrc = user.avatar
-    ? `http://localhost:5000${user.avatar}`
+    ? `http://localhost:5000/${user.avatar}`
     : "/default-avatar.png";
 
   const handleDeleteAccount = () => {

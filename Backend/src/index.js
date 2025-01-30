@@ -44,7 +44,7 @@ app.use(
 
 // Middleware para servir archivos estaticos
 
-app.use(express.static("src/static"));
+app.use(express.static("src/uploads"));
 
 // ------------------------- RUTAS -------------------------
 // import path from "path";
