@@ -173,20 +173,43 @@ SPRINT FRAN
    git clone <url-del-repositorio>
    ```
 
-2. Instalar dependencias:
+2. Instalar dependencias en Backend:
+   ```bash
+   cd Backend
+   ```
+
+   ```bash
+   npm install
+   ```
+   
+3. Instalar dependencias en Frontend:
+   ```bash
+   cd Frontend
+   ```
 
    ```bash
    npm install
    ```
 
-3. Configurar variables de entorno:
+4. Configurar variables de entorno:
 
    - Crear un archivo `.env` basado en el ejemplo proporcionado.
 
-4. Iniciar el servidor:
+5. Iniciar el Backend:
+   ```bash
+   cd Backend
+   ```
 
    ```bash
    npm start
    ```
+   
+6. Iniciar el Frontend:
+  ```bash
+   cd Frontend
+   ```
+   ```bash
+   npm start
+   ```
 
-5. Probar los endpoints usando herramientas como Postman.
+7. Probar los endpoints usando herramientas como Postman.
