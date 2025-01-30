@@ -15,13 +15,14 @@ import {
 
 // import upload from "../middlewares/uploadMiddleware.js";
 import { handleFileUpload } from "../middlewares/uploadMiddleware.js";
+import { getUserProfile } from "../controllers/userController.js";
 
 const router = Router(); // Crear una instancia del router de Express
 
 // ------------------------- RUTAS DE USUARIOS -------------------------
 //Obtener datos del usuario
-console.log("📡 Cargando ruta GET users/me...");
-router.get("users/me", authenticateUser, userController.getUserProfile);
+console.log("📡 Cargando ruta GET /me...");
+router.get("/me", authenticateUser, getUserProfile);
 
 // Ruta de registro de usuarios
 router.post("/register", userController.registerUser);

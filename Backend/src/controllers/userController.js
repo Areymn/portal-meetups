@@ -662,7 +662,7 @@ const updateUserProfile = async (req, res) => {
 // obtener datos del usuario
 
 export const getUserProfile = async (req, res) => {
-  console.log("📡 Recibiendo solicitud en getUserProfile...");
+  console.log("📡 Ejecutando getUserProfile para el usuario ID:", req.user?.id);
 
   try {
     console.log("📡 Solicitando datos del usuario...");
@@ -678,7 +678,7 @@ export const getUserProfile = async (req, res) => {
     }
 
     console.log("✅ Datos del usuario encontrados:", users[0]);
-    res.json(users[0]); // Enviar datos al frontend
+    res.status(200).json(users[0]); // Enviar datos al frontend
   } catch (error) {
     console.error("❌ Error en getUserProfile:", error.message);
     res.status(500).json({ error: "Error interno del servidor." });

@@ -41,12 +41,30 @@ export const UserProvider = ({ children }) => {
   const fetchUserData = async () => {
     try {
       console.log("📡 Solicitando datos del usuario...");
-      const response = await fetch("http://localhost:5000/api/me", { headers });
+
+      const storedToken = localStorage.getItem("token");
+      if (!storedToken) {
+        throw new Error("No hay token en localStorage.");
+      }
+
+      const headers = {
+        // 🔥 Posible corrección
+        Authorization: `Bearer ${storedToken}`,
+        "Content-Type": "application/json",
+      };
+
+      const response = await fetch("http://localhost:5000/api/users/me", {
+        headers,
+      });
 
       console.log("🔄 Respuesta del servidor en `fetchUserData`:", response);
 
+      // if (!response.ok) {
+      //   throw new Error(`Error: ${response.status}`);
+      // }
+
       if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
+        throw new Error("Error al obtener datos del usuario");
       }
 
       const data = await response.json();

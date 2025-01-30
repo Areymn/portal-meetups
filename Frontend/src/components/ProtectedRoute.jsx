@@ -11,7 +11,7 @@ const ProtectedRoute = ({ children }) => {
 
   if (!user || !user.email || !token) {
     // Si no hay usuario autenticado, redirige al login
-    console.log("Acceso denegado, redirigiendo al login...");
+    console.log("🔴 Usuario no autenticado, redirigiendo a login...");
     return <Navigate to="/login" replace />;
   }
 
