@@ -382,62 +382,6 @@ const passwordRecovery = async (req, res) => {
   });
 };
 
-// ------------------------- CAMBIO DE CONTRASEÑA -------------------------
-/**
- * Cambia la contraseña de un usuario utilizando un código de recuperación.
- */
-
-// Función para cambiar la contraseña
-// const changePassword = async (req, res) => {
-//   try {
-//     console.log("Body recibido:", req.body); // Log para depurar
-
-//     const schema = Joi.object({
-//       email: Joi.string().email().required(),
-//       recoveryCode: Joi.string().required(),
-//       newPassword: Joi.string().min(6).required(),
-//     });
-
-//     const { error, value } = schema.validate(req.body);
-//     if (error) {
-//       return res.status(400).json({ error: error.details[0].message });
-//     }
-
-//     const { email, recoveryCode, newPassword } = value;
-//     const pool = await getPool();
-//     // Modificada la consulta para hacer JOIN con la tabla users
-//     const [records] = await pool.query(
-//       `SELECT pr.user_id FROM password_recovery pr
-//       JOIN users u ON pr.user_id = u.id
-//       WHERE u.email = ? AND pr.recovery_code = ? AND pr.expires_at > NOW()`,
-//       [email, recoveryCode]
-//     );
-
-//     if (records.length === 0) {
-//       return res
-//         .status(400)
-//         .json({ error: "Código de recuperación inválido o expirado." });
-//     }
-
-//     // Encriptar y actualizar la nueva contraseña
-//     const hashedPassword = await bcryptjs.hash(newPassword, 10);
-//     await pool.query("UPDATE users SET password = ? WHERE id = ?", [
-//       hashedPassword,
-//       records[0].user_id,
-//     ]);
-
-//     // Eliminar el código de recuperación usado
-//     await pool.query("DELETE FROM password_recovery WHERE recovery_code = ?", [
-//       recoveryCode,
-//     ]);
-
-//     res.status(200).json({ message: "Contraseña actualizada correctamente." });
-//   } catch (err) {
-//     console.error("Error en changePassword:", err.message);
-//     res.status(500).json({ error: "Error interno del servidor." });
-//   }
-// };
-
 //Este método se encargará de validar el token de recuperación y actualizar la contraseña del usuario.
 // Función común para actualizar la contraseña del usuario
 const updateUserPassword = async (userId, newPassword) => {

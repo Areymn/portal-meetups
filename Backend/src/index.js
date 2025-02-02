@@ -8,7 +8,7 @@ import express, { json } from "express"; // Framework de servidor web
 import { PORT } from "./env.js"; // Obtenemos las variables de entorno
 import initDB from "./db/initDB.js";
 import bodyParser from "body-parser"; // Middleware para parsear cuerpos JSON
-import cors from "cors"; // Middleware para permitir solicitudes de otros dominios
+import corsMiddleware from "./middlewares/corsMiddleware.js"; // Middleware para permitir solicitudes de otros dominios
 import path from "path"; // Módulo para manejar rutas de archivos
 import userRoutes from "./routes/userRoutes.js"; // Importar rutas de usuarios
 import meetups from "./routes/meetups.js"; // Importa las rutas de los meetups
@@ -31,12 +31,13 @@ app.use(logger); //Archivos estaticos
 app.use(json()); // Parsear JSON en el body de las solicitudes
 
 // Configurar CORS para permitir solicitudes desde cualquier origen
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  })
-); // Permite todas las solicitudes (puedes restringirlo a dominios específicos)
+app.use(corsMiddleware);
+// app.use(
+//   cors({
+//     origin: "http://localhost:5173",
+//     credentials: true,
+//   })
+//   ); // Permite todas las solicitudes (puedes restringirlo a dominios específicos)
 //     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // Métodos HTTP permitidos
 //     allowedHeaders: ["Content-Type", "Authorization"], // Headers permitidas
 //   })

@@ -6,6 +6,7 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState("");
   const [passwordResetCompleted, setPasswordResetCompleted] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // 🔄 Cargar usuario y token desde localStorage al iniciar la aplicación
   useEffect(() => {
@@ -18,58 +19,36 @@ export const UserProvider = ({ children }) => {
 
     if (savedUser && savedToken) {
       try {
-        const parsedUser = JSON.parse(savedUser);
-        setUser(parsedUser);
+        setUser(JSON.parse(savedUser));
         setToken(savedToken);
-        console.log(
-          "✅ Usuario y token cargados en `UserContext`:",
-          parsedUser,
-          savedToken
-        );
       } catch (error) {
-        console.error(
-          "❌ Error al parsear usuario desde `localStorage`:",
-          error
-        );
+        console.error("Error al parsear usuario:", error);
       }
-    } else {
-      console.log("⚠️ No se encontraron usuario o token en `localStorage`.");
     }
+    setLoading(false);
   }, []);
 
   // ✅ Nueva función para recuperar datos actualizados del usuario
   const fetchUserData = async () => {
     try {
       console.log("📡 Solicitando datos del usuario...");
-
-      const storedToken = localStorage.getItem("token");
-      if (!storedToken) {
-        throw new Error("No hay token en localStorage.");
-      }
-
-      const headers = {
-        // 🔥 Posible corrección
-        Authorization: `Bearer ${storedToken}`,
-        "Content-Type": "application/json",
-      };
-
       const response = await fetch("http://localhost:5000/api/users/me", {
-        headers,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
       });
 
-      console.log("🔄 Respuesta del servidor en `fetchUserData`:", response);
-
-      // if (!response.ok) {
-      //   throw new Error(`Error: ${response.status}`);
-      // }
-
       if (!response.ok) {
-        throw new Error("Error al obtener datos del usuario");
+        alert(
+          "⚠️ No se pudo obtener la sesión. Revisa tu conexión o inicia sesión de nuevo."
+        );
+        return;
       }
 
       const data = await response.json();
       setUser(data);
-      console.log("✅ Datos de usuario cargados correctamente:", data);
+      console.log("✅ Usuario obtenido correctamente:", data);
     } catch (error) {
       console.error("❌ Error al recuperar usuario:", error);
     }
@@ -79,10 +58,10 @@ export const UserProvider = ({ children }) => {
   const login = async (userData, userToken) => {
     console.log("🔐 Usuario recibido en login:", userData);
 
-    setUser(userData);
-    setToken(userToken);
     localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("token", userToken);
+    setUser(userData);
+    setToken(userToken);
 
     console.log("✅ Usuario guardado en localStorage correctamente.");
 
@@ -162,6 +141,7 @@ export const UserProvider = ({ children }) => {
         setPasswordResetCompleted,
         authenticatedFetch,
         fetchUserData, // 🔄 Se expone para poder usarse en otros componentes
+        loading,
       }}
     >
       {children}
