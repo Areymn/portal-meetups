@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useUserContext } from "../context/UserContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSort } from "@fortawesome/free-solid-svg-icons";
@@ -13,9 +13,23 @@ const EventList = () => {
   const [filterTheme, setFilterTheme] = useState(""); // Estado para el filtro por temática
   const [filterDate, setFilterDate] = useState("all"); // Estado para el filtro de fechas
   const [sortOrder, setSortOrder] = useState("date"); // Estado para la ordenación
-  const { authenticatedFetch } = useUserContext();
+  const { token, authenticatedFetch } = useUserContext();
+  const navigate = useNavigate();
 
   useEffect(() => {
+    if (!token) {
+      console.log("Token no válido o ausente, redirigiendo al login...");
+      navigate("/login");
+      return; // Detiene la ejecución del useEffect si no hay token
+    }
+
+    console.log("Token válido, procediendo a cargar datos...");
+    const fetchData = async () => {
+      await fetchEvents();
+      await fetchCities();
+      await fetchThemes();
+    };
+
     // Cargar eventos
     const fetchEvents = async () => {
       try {

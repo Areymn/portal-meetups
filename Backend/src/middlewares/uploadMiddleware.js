@@ -84,7 +84,7 @@ const handleFileUpload = (req, res, next) => {
     try {
       const pool = await getPool();
       await pool.query("UPDATE users SET avatar = ? WHERE id = ?", [
-        req.file.path,
+        req.file.filename,
         req.user.user_id, // 🔄 Verificar que el ID es correcto
       ]);
 
