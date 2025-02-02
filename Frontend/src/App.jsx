@@ -10,6 +10,8 @@ import {
 import "./styles.css";
 import { UserProvider, useUserContext } from "./context/UserContext";
 import MeetupForm from "./components/MeetupForm";
+import MeetupPage from "./components/MeetupPage";
+
 import RegisterForm from "./components/RegisterForm";
 import LoginForm from "./components/LoginForm";
 import UserValidationForm from "./components/UserValidationForm";
@@ -148,17 +150,7 @@ const App = () => {
               path="/meetups/form"
               element={
                 <ProtectedRoute>
-                  <>
-                    <h1>Crear/Modificar Meetup</h1>
-                    <MeetupForm onSubmit={handleMeetupSubmit} />
-                    {meetups.map((meetup, index) => (
-                      <div key={index}>
-                        <h2>{meetup.title}</h2>
-                        <p>{meetup.description}</p>
-                        <p>{meetup.date}</p>
-                      </div>
-                    ))}
-                  </>
+                  <MeetupPage />
                 </ProtectedRoute>
               }
             />

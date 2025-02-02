@@ -6,29 +6,25 @@ const EventDetail = () => {
   const { id } = useParams();
   const { authenticatedFetch } = useUserContext();
   const [event, setEvent] = useState(null);
+  const [cities, setCities] = useState([]); // Estado para las ciudades
   const [rating, setRating] = useState("");
   const [comment, setComment] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
-  // Cargar detalles del evento al montar el componente
   useEffect(() => {
     const fetchEventDetails = async () => {
       console.log("Cargando detalles del evento...");
       try {
-        const eventData = await authenticatedFetch(
+        const data = await authenticatedFetch(
           `http://localhost:5000/api/meetups/${id}/detail`
         );
-        if (!eventData || !eventData.event) {
+        if (!data || !data.event) {
           throw new Error("Datos del evento no válidos.");
         }
-        setEvent(eventData.event);
-        console.log("Detalles del evento cargados:", eventData.event);
-        console.log(
-          "Comentarios del evento cargados:",
-          eventData.event.comments
-        );
+        console.log("Detalles del evento cargados:", data.event);
+        setEvent(data.event);
       } catch (err) {
         setError(
           err.message ||
@@ -37,8 +33,36 @@ const EventDetail = () => {
         console.error("Error al cargar los detalles del evento:", err);
       }
     };
+
     fetchEventDetails();
   }, [id, authenticatedFetch]);
+
+  // Cargar la lista de ciudades para obtener el nombre correspondiente al cityId
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        const data = await authenticatedFetch(
+          "http://localhost:5000/api/meetups/cities"
+        );
+        // Se espera que data tenga la estructura: { cities: [ { id, name }, ... ] }
+        setCities(data.cities);
+      } catch (error) {
+        console.error("Error al cargar ciudades:", error);
+      }
+    };
+
+    fetchCities();
+  }, [authenticatedFetch]);
+
+  // Definir isEventFinished para determinar si el evento ya ha finalizado.
+  const isEventFinished = event ? new Date(event.date) < new Date() : false;
+
+  // Buscar el nombre de la ciudad a partir del cityId del evento
+  const cityName =
+    event && cities.length > 0
+      ? cities.find((city) => city.id === event.cityId)?.name ||
+        "No especificada"
+      : "No especificada";
 
   // Manejar el envío de una valoración
   const handleSubmit = async (e) => {
@@ -46,7 +70,6 @@ const EventDetail = () => {
     setError("");
     setSuccess("");
     console.log("Enviando valoración:", { rating, comment });
-
     try {
       await authenticatedFetch(`http://localhost:5000/api/meetups/${id}/rate`, {
         method: "POST",
@@ -55,12 +78,11 @@ const EventDetail = () => {
       setSuccess("¡Valoración y comentario añadidos con éxito!");
       setRating("");
       setComment("");
-
       // Recargar los detalles del evento después de enviar la valoración
-      const updatedEvent = await authenticatedFetch(
+      const updatedData = await authenticatedFetch(
         `http://localhost:5000/api/meetups/${id}/detail`
       );
-      setEvent(updatedEvent.event);
+      setEvent(updatedData.event);
     } catch (err) {
       setError(err.message || "Error al enviar la valoración.");
       console.error("Error al valorar el evento:", err);
@@ -73,17 +95,14 @@ const EventDetail = () => {
       {success && <p className="success">{success}</p>}
       {event ? (
         <div>
-          {/* Detalles del evento */}
           <h2>{event.title || "Sin título"}</h2>
           <p>{event.description || "Descripción no disponible."}</p>
           <p>
-            <strong>Fecha:</strong>{" "}
-            {event.date
-              ? new Date(event.date).toLocaleDateString()
-              : "Fecha no disponible"}
+            <strong>Ciudad:</strong> {cityName} - <strong>Dirección:</strong>{" "}
+            {event.place || "No especificada"}
           </p>
           <p>
-            <strong>Lugar:</strong> {event.place || "Lugar no especificado"}
+            <strong>Fecha:</strong> {new Date(event.date).toLocaleDateString()}
           </p>
 
           {/* Mostrar comentarios */}
@@ -108,35 +127,38 @@ const EventDetail = () => {
             )}
           </div>
 
-          {/* Formulario para valorar y comentar */}
-          <form onSubmit={handleSubmit} className="rating-form">
-            <h3>Valorar y comentar evento</h3>
-            <div>
-              <label htmlFor="rating">Puntuación (1-5):</label>
-              <input
-                type="number"
-                id="rating"
-                value={rating}
-                onChange={(e) => setRating(e.target.value)}
-                min="1"
-                max="5"
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="comment">Comentario:</label>
-              <textarea
-                id="comment"
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                maxLength="300"
-                required
-              ></textarea>
-            </div>
-            <button type="submit">Enviar valoración</button>
-          </form>
+          {/* Mostrar formulario de valoración solo si el evento ya ha finalizado */}
+          {isEventFinished ? (
+            <form onSubmit={handleSubmit} className="rating-form">
+              <h3>Valorar y comentar evento</h3>
+              <div>
+                <label htmlFor="rating">Puntuación (1-5):</label>
+                <input
+                  type="number"
+                  id="rating"
+                  value={rating}
+                  onChange={(e) => setRating(e.target.value)}
+                  min="1"
+                  max="5"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="comment">Comentario:</label>
+                <textarea
+                  id="comment"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  maxLength="300"
+                  required
+                ></textarea>
+              </div>
+              <button type="submit">Enviar valoración</button>
+            </form>
+          ) : (
+            <p>El evento aún no ha finalizado, no se puede valorar.</p>
+          )}
 
-          {/* Botón para volver */}
           <button onClick={() => navigate("/")} className="back-button">
             Volver
           </button>

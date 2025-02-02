@@ -70,10 +70,14 @@ export const detailEvent = async (req, res) => {
 export const getCities = async (req, res) => {
   try {
     const pool = await getPool();
-    const [cities] = await pool.query("SELECT DISTINCT place FROM events");
+    // Se consulta la tabla 'cities' para obtener tanto el id como el nombre
+    const [cities] = await pool.query(
+      "SELECT id, name FROM cities ORDER BY name"
+    );
     console.log("Ciudades recuperadas:", cities);
 
-    res.status(200).json({ cities: cities.map((city) => city.place) });
+    // Se devuelve la lista de ciudades tal como objetos con id y name
+    res.status(200).json({ cities });
   } catch (error) {
     console.error("Error al obtener las ciudades:", error.message);
     res.status(500).json({ error: "Error interno del servidor" });
@@ -90,7 +94,9 @@ export const getCities = async (req, res) => {
 export const getThemes = async (req, res) => {
   try {
     const pool = await getPool();
-    const [themes] = await pool.query("SELECT DISTINCT id, name FROM themes");
+    const [themes] = await pool.query(
+      "SELECT DISTINCT id, name FROM themes ORDER BY name"
+    );
     console.log("Temáticas recuperadas:", themes);
 
     return res.status(200).json({ themes });

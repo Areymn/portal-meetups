@@ -18,6 +18,8 @@ import { logger } from "./middlewares/logger.js";
 
 const app = express(); // Crear una instancia de la aplicación Express
 
+app.use(corsMiddleware);
+
 app.use((req, res, next) => {
   console.log(`📡 Nueva solicitud recibida: ${req.method} ${req.url}`);
   console.log("📜 Headers de la solicitud:", req.headers);
@@ -31,7 +33,7 @@ app.use(logger); //Archivos estaticos
 app.use(json()); // Parsear JSON en el body de las solicitudes
 
 // Configurar CORS para permitir solicitudes desde cualquier origen
-app.use(corsMiddleware);
+
 // app.use(
 //   cors({
 //     origin: "http://localhost:5173",

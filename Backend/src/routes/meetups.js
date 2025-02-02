@@ -25,7 +25,7 @@ const router = Router();
 // ------------------------- RUTAS DE MEETUPS -------------------------
 
 // Ruta para crear un evento
-router.post("/create", authenticateUser, createEvents);
+router.post("/", authenticateUser, createEvents);
 
 // Ruta para obtener los detalles de un evento
 router.get("/:id/detail", authenticateUser, detailEvent);
