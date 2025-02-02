@@ -89,3 +89,27 @@
 .delete-account-btn:hover {
   background-color: #a71d2a;
 }
+
+/**PREVIEW**/
+
+.avatar-preview-container {
+  /* Limita el ancho máximo del contenedor */
+  max-width: 100%;
+  /* Opcional: establece un alto máximo si lo requieres */
+  max-height: 200px;
+  /* Oculta el contenido que se desborde */
+  overflow: hidden;
+  /* Centra el contenido, si lo deseas */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.avatar-preview {
+  /* Asegura que la imagen ocupe el 100% del contenedor sin desbordarse */
+  max-width: 100%;
+  max-height: 100%;
+  /* Permite que la imagen se recorte de forma adecuada, si es necesario */
+  object-fit: cover;
+}

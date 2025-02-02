@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useUserContext } from "../context/UserContext";
 
 const UploadAvatar = () => {
-  const { user, token, setUser } = useUserContext(); // Asegurar que token existe
+  const { token, updateUser, fetchUserData } = useUserContext(); // Asegurar que token existe
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,28 +27,32 @@ const UploadAvatar = () => {
 
     try {
       console.log("🔄 Enviando archivo...");
-      console.log("🛠️ Token antes de la solicitud:", token); // Agregar log para verificar
+      console.log("🛠️ Token antes de la solicitud:", token);
 
       const response = await fetch(
         "http://localhost:5000/api/users/profile/upload",
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${token}`, // 👈 Enviar token correctamente
+            Authorization: `Bearer ${token}`,
           },
           body: formData,
         }
       );
 
       const data = await response.json();
+      console.log("Respuesta filePath:", data.filePath);
       console.log("✅ Respuesta del servidor:", data);
 
       if (response.ok) {
-        setUser((prevUser) => ({
-          ...prevUser,
-          avatar: data.filePath || "/default-avatar.png",
-        }));
+        // Actualizamos el usuario en el contexto usando updateUser
+        updateUser({ avatar: data.filePath });
+        // Llamamos a fetchUserData para refrescar la información del usuario
+        await fetchUserData();
         alert("✅ Foto subida con éxito.");
+        // Limpiar preview y selectedFile tras subir la foto
+        setPreview("");
+        setSelectedFile(null);
       } else {
         throw new Error(data.error || "Error al subir la foto");
       }

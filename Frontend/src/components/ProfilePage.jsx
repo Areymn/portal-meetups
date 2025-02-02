@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "../styles/ProfilePage.css";
 
 import UploadAvatar from "./UploadAvatar";
@@ -10,9 +10,16 @@ const ProfilePage = () => {
   const { user } = useUserContext();
   if (!user) return <p>Cargando perfil...</p>;
 
+  // Aquí añadimos el useEffect para depuración del avatar:
+  useEffect(() => {
+    console.log("Avatar actualizado en el contexto:", user.avatar);
+  }, [user.avatar]);
+
+  // Agregamos un query param con el timestamp para evitar el cacheo del navegador
   const avatarSrc = user.avatar
-    ? `http://localhost:5000/${user.avatar}`
+    ? `http://localhost:5000/${user.avatar}?t=${new Date().getTime()}`
     : "/default-avatar.png";
+  console.log("Avatar URL:", avatarSrc);
 
   const handleDeleteAccount = () => {
     const confirmDelete = window.confirm(
@@ -29,6 +36,7 @@ const ProfilePage = () => {
       <h1 className="profile-title">Perfil de Usuario</h1>
       <div className="profile-info">
         <img
+          key={user.avatar}
           src={avatarSrc}
           alt="Avatar de usuario"
           className="profile-avatar"
