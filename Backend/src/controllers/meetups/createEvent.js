@@ -13,9 +13,8 @@ import {
 } from "../../db/events.js";
 
 // Importa la librería Joi para validar los datos de entrada del usuario.
-// Joi es útil para garantizar que los datos cumplan con un formato específico antes de procesarlos.
 import Joi from "joi";
-const { object, string } = Joi;
+const { object, string, number, array } = Joi;
 import moment from "moment";
 
 // -------------------------
@@ -24,6 +23,17 @@ import moment from "moment";
 
 /**
  * Controlador para crear un nuevo evento.
+ * Se espera que el objeto en req.body tenga las siguientes propiedades:
+ * - title: string (Título del evento)
+ * - description: string (Descripción del evento)
+ * - place: string (Lugar del evento)
+ * - date: date (Fecha y hora del evento; debe ser en el pasado)
+ * - user: string (Usuario asociado al evento)
+ * - type: string (Tipo de evento)
+ * - cityId: number (ID de la ciudad)
+ * - themeId: number (ID del tema)
+ * - attendees (opcional): arreglo de strings
+ *
  * @param {Object} req - La solicitud HTTP que contiene los datos del evento en `req.body`.
  * @param {Object} res - La respuesta HTTP que se devolverá al cliente.
  */
@@ -33,57 +43,78 @@ export const createEvents = async (req, res) => {
     console.log("Solicitud recibida:", req.body);
 
     // Definir un esquema de validación para los datos del evento.
-    // Esto asegura que los datos proporcionados cumplen con los requisitos esperados.
-    const schema = object({
-      name: string().min(3).max(30).required(), // Nombre del evento: entre 3 y 30 caracteres.
-      place: string().min(3).max(30).required(), // Lugar del evento: entre 3 y 30 caracteres.
-      time: string().date().required(), // Hora del evento: debe ser una fecha válida.
-      user: string().min(3).max(30).required(), // Usuario asociado al evento: entre 3 y 30 caracteres.
-      type: string().min(3).max(30).required(), // Tipo de evento: entre 3 y 30 caracteres.
+    const schema = Joi.object({
+      title: Joi.string().min(3).max(500).required(),
+      description: Joi.string().required(),
+      place: Joi.string().min(3).max(100).required(),
+      date: Joi.date().required(),
+      user: Joi.string().min(3).max(30).required(),
+      type: Joi.string().min(3).max(30).required(),
+      cityId: Joi.number().integer().required(),
+      themeId: Joi.number().integer().required(),
+      attendees: Joi.array().items(Joi.string()).optional(),
     });
 
     // Validar los datos de la solicitud utilizando el esquema definido.
     const { error } = schema.validate(req.body);
-
-    // Si los datos no son válidos, devolver un error 400 al cliente con el detalle del error.
     if (error) {
       return res.status(400).json({ error: error.details[0].message });
     }
 
     // Extraer los datos validados del cuerpo de la solicitud.
-    const { id, name, place, time, user, type, attendees } = req.body;
+    let {
+      title,
+      description,
+      place,
+      date,
+      user,
+      type,
+      cityId,
+      themeId,
+      attendees,
+    } = req.body;
 
-    if (events.isFutureDate(moment(time))) {
+    // Verificar que la fecha no sea en el futuro.
+    if (isFutureDate(moment(date))) {
       return res.status(400).send("Event has not occurred yet");
     }
 
-    // TODO: Generate a unique ID for event
+    // Si no se proporcionan asistentes, se inicializa como un arreglo vacío.
+    if (!attendees) {
+      attendees = [];
+    }
 
     // Crear un nuevo objeto de evento con los datos recibidos.
-    const newEvent = { id, name, place, time, user, type, attendees };
+    const newEvent = {
+      title,
+      description,
+      place,
+      date,
+      user,
+      type,
+      cityId,
+      themeId,
+      attendees,
+    };
 
-    // Agregar el nuevo evento al array `events`.
-    events.dbCreateEvent(newEvent); //renombrada para poder ser usada, añadi db para evitar conflicto de misma nomenclatura
+    // Intentar crear el evento en la base de datos.
+    await dbCreateEvent(newEvent);
 
-    // Log para depuración: imprime la lista actualizada de eventos.
-    console.log("Lista actualizada de eventos", newEvent);
+    // Log para depuración: imprime el evento creado.
+    console.log("Evento creado:", newEvent);
 
-    // Enviar una respuesta con el código 201 para indicar que el evento fue creado exitosamente.
-    return res.status(201).json({ message: "Evento registrado con éxito." });
+    // Enviar una respuesta exitosa.
+    return res
+      .status(201)
+      .json({ message: "Evento registrado con éxito.", event: newEvent });
   } catch (err) {
-    // Capturar y manejar cualquier error inesperado que ocurra durante el proceso.
-
-    // Imprimir el mensaje de error en la consola para fines de depuración.
+    // Capturar y manejar cualquier error inesperado.
     console.error("Error en el controlador:", err.message);
-
-    // Enviar una respuesta con el código 500 para indicar un error interno del servidor.
-    res.status(500).json({ error: "Error interno del servidor" });
+    return res.status(500).json({ error: "Error interno del servidor" });
   }
 };
 
 // -------------------------
 // EXPORTAR FUNCIONES
 // -------------------------
-
-// Exportar la función `createEvents` para que pueda ser utilizada en otros módulos.
 export default { createEvents };
