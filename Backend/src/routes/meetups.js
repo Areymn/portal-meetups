@@ -12,7 +12,7 @@ import {
   getThemes,
 } from "../controllers/meetups/detailEvent.js"; // Agregamos getThemes
 import { getEvents } from "../controllers/meetups/sortEvent.js";
-import { signupEvent } from "../controllers/meetups/signupEvent.js";
+import { signUpEvent } from "../controllers/meetups/signupEvent.js";
 import { editEvent } from "../controllers/meetups/editEvent.js";
 import { validateEvent } from "../controllers/meetups/validateEvent.js";
 import { authenticateAdmin } from "../middlewares/authAdmin.js";
@@ -34,7 +34,7 @@ router.get("/:id/detail", authenticateUser, detailEvent);
 router.put("/edit/:id", authenticateUser, editEvent);
 
 // Ruta para inscribirse en un evento
-router.post("/signup", authenticateUser, signupEvent);
+router.post("/:id/signup", authenticateUser, signUpEvent);
 
 // Ruta para que el administrador valide eventos
 router.post("/admin/validate", authenticateAdmin, validateEvent);
