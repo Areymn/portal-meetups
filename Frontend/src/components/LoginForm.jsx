@@ -34,52 +34,54 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="login-container">
-      <h2>Iniciar Sesión</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Correo Electrónico</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Contraseña</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        {/* ✅ Agregado enlace para recuperar contraseña */}
-        <div>
-          <Link
-            to="/password-recovery"
-            style={{
-              display: "block",
-              marginBottom: "10px",
-              color: "#007bff",
-              textDecoration: "none",
-            }}
-          >
-            ¿Olvidaste tu contraseña?
+    <div className="common-page">
+      <div className="login-container">
+        <h2>Iniciar Sesión</h2>
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="email">Correo Electrónico</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="password">Contraseña</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          {/* ✅ Agregado enlace para recuperar contraseña */}
+          <div>
+            <Link
+              to="/password-recovery"
+              style={{
+                display: "block",
+                marginBottom: "10px",
+                color: "#007bff",
+                textDecoration: "none",
+              }}
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
+          <button type="submit">Iniciar Sesión</button>
+        </form>
+        {/* ✅ Enlace para registrarse debajo del formulario */}
+        <p style={{ marginTop: "10px" }}>
+          ¿No tienes cuenta?{" "}
+          <Link to="/register" style={{ color: "#007bff" }}>
+            Regístrate aquí
           </Link>
-        </div>
-        <button type="submit">Iniciar Sesión</button>
-      </form>
-      {/* ✅ Enlace para registrarse debajo del formulario */}
-      <p style={{ marginTop: "10px" }}>
-        ¿No tienes cuenta?{" "}
-        <Link to="/register" style={{ color: "#007bff" }}>
-          Regístrate aquí
-        </Link>
-      </p>
+        </p>
+      </div>
     </div>
   );
 };

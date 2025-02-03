@@ -65,29 +65,35 @@ const UploadAvatar = () => {
   };
 
   return (
-    <div className="form-container">
-      <h3>Cambiar Foto de Perfil</h3>
-      <form className="form">
-        <div>
-          <label htmlFor="fileUpload">Selecciona una imagen</label>
-          <input
-            type="file"
-            id="fileUpload"
-            accept="image/*"
-            onChange={handleFileChange}
-          />
-        </div>
-
-        {preview && (
-          <div className="avatar-preview-container">
-            <img src={preview} alt="Vista previa" className="avatar-preview" />
+    <div className="common-page">
+      <div className="form-container">
+        <h3>Cambiar Foto de Perfil</h3>
+        <form className="form">
+          <div>
+            <label htmlFor="fileUpload">Selecciona una imagen</label>
+            <input
+              type="file"
+              id="fileUpload"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
           </div>
-        )}
 
-        <button type="button" onClick={handleUpload} disabled={loading}>
-          {loading ? "Subiendo..." : "Actualizar Foto"}
-        </button>
-      </form>
+          {preview && (
+            <div className="avatar-preview-container">
+              <img
+                src={preview}
+                alt="Vista previa"
+                className="avatar-preview"
+              />
+            </div>
+          )}
+
+          <button type="button" onClick={handleUpload} disabled={loading}>
+            {loading ? "Subiendo..." : "Actualizar Foto"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

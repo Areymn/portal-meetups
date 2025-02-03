@@ -48,21 +48,23 @@ const PasswordRecoveryForm = () => {
   };
 
   return (
-    <div className="form-container">
-      <h2>Recuperación de Contraseña</h2>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Correo Electrónico
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </label>
-        {error && <p className="error">{error}</p>}
-        <button type="submit">Enviar Código</button>
-      </form>
+    <div className="common-page">
+      <div className="form-container">
+        <h2>Recuperación de Contraseña</h2>
+        <form onSubmit={handleSubmit}>
+          <label>
+            Correo Electrónico
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </label>
+          {error && <p className="error">{error}</p>}
+          <button type="submit">Enviar Código</button>
+        </form>
+      </div>
     </div>
   );
 };

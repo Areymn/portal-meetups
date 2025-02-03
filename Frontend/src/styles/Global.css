@@ -1,0 +1,119 @@
+/* global.css */
+
+/* Variables y reset básico */
+:root {
+  /* Variables globales (valores en rem para que sean relativos al tamaño base) */
+  --font-base: "Inter", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --color-text: #333;
+  --color-bg: #f5f5f5;
+  --color-primary: #007bff;
+  --color-primary-hover: #0056b3;
+  --color-secondary: #646cff;
+  --color-secondary-hover: #535bf2;
+  --color-accent: #dc3545; /* Para botones de acción crítica (p.ej., eliminar) */
+  --shadow-light: 0 0.25rem 0.375rem rgba(0, 0, 0, 0.1); /* Aproximadamente 4px y 6px */
+  --shadow-hover: 0 0.375rem 0.75rem rgba(0, 0, 0, 0.2); /* Aproximadamente 6px y 12px */
+  --border-radius: 0.25rem; /* 4px */
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-base);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  /* Evita que el body se haga más pequeño que 20rem (320px) */
+  min-width: 20rem;
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* Contenedor común para centrar el contenido y limitar su ancho en pantallas grandes */
+.common-page {
+  width: 100%;
+  max-width: 75rem; /* Aproximadamente 1200px */
+  margin: 0 auto;
+  padding: 0 1.25rem; /* 20px lateral */
+}
+
+/* Tipografía global */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-align: center;
+  color: var(--color-text);
+}
+
+/* Estilos para enlaces */
+a {
+  text-decoration: none;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+/* Estilos globales para botones */
+button {
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.3s ease, border-color 0.25s;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* Contenedor adicional (opcional) */
+.container {
+  width: 100%;
+  max-width: 75rem;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* Barra de navegación (si aplica globalmente) */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.625rem 1.25rem; /* 10px y 20px en rem */
+  background-color: var(--color-primary);
+}
+.navbar a,
+.navbar button {
+  color: #fff;
+}
+.navbar-link {
+  margin-right: 0.9375rem; /* 15px */
+  font-weight: 500;
+}
+.navbar-button {
+  background-color: var(--color-accent);
+  padding: 0.5rem 0.75rem; /* 8px y 12px */
+}
+.navbar-link:hover,
+.navbar-button:hover {
+  opacity: 0.8;
+}
+
+/* Media query para ajustar el padding en contenedores en pantallas medianas */
+@media (min-width: 48rem) {
+  /* 768px */
+  .container {
+    padding: 0 2.5rem; /* 40px */
+  }
+}

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import "../styles/events.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useUserContext } from "../context/UserContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -116,145 +117,147 @@ const EventList = () => {
     });
 
   return (
-    <div className="event-list">
-      <h1>Lista de eventos</h1>
+    <div className="common-page">
+      <div className="event-list">
+        <h1>Lista de eventos</h1>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
 
-      {/* Controles de filtro y ordenación */}
-      <form className="filter-form">
-        <div className="filter-group">
-          <label htmlFor="city">Filtrar por ciudad:</label>
-          <select
-            id="city"
-            onChange={(e) => setFilterCity(e.target.value)}
-            value={filterCity}
-          >
-            <option value="">Todas</option>
-            {cities.map((city) => (
-              <option key={city.id} value={city.id}>
-                {city.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Controles de filtro y ordenación */}
+        <form className="filter-form">
+          <div className="filter-group">
+            <label htmlFor="city">Filtrar por ciudad:</label>
+            <select
+              id="city"
+              onChange={(e) => setFilterCity(e.target.value)}
+              value={filterCity}
+            >
+              <option value="">Todas</option>
+              {cities.map((city) => (
+                <option key={city.id} value={city.id}>
+                  {city.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className="filter-group">
-          <label htmlFor="theme">Filtrar por temática:</label>
-          <select
-            id="theme"
-            onChange={(e) => setFilterTheme(e.target.value)}
-            value={filterTheme}
-          >
-            <option value="">Todas</option>
-            {themes.map((theme) => (
-              <option key={theme.id} value={theme.id}>
-                {theme.name}
-              </option>
-            ))}
-          </select>
-        </div>
+          <div className="filter-group">
+            <label htmlFor="theme">Filtrar por temática:</label>
+            <select
+              id="theme"
+              onChange={(e) => setFilterTheme(e.target.value)}
+              value={filterTheme}
+            >
+              <option value="">Todas</option>
+              {themes.map((theme) => (
+                <option key={theme.id} value={theme.id}>
+                  {theme.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className="filter-group">
-          <label htmlFor="dateFilter">Filtrar por fecha:</label>
-          <select
-            id="dateFilter"
-            onChange={(e) => setFilterDate(e.target.value)}
-            value={filterDate}
-          >
-            <option value="all">Todos</option>
-            <option value="past">Pasados</option>
-            <option value="future">Futuros</option>
-          </select>
-        </div>
+          <div className="filter-group">
+            <label htmlFor="dateFilter">Filtrar por fecha:</label>
+            <select
+              id="dateFilter"
+              onChange={(e) => setFilterDate(e.target.value)}
+              value={filterDate}
+            >
+              <option value="all">Todos</option>
+              <option value="past">Pasados</option>
+              <option value="future">Futuros</option>
+            </select>
+          </div>
 
-        <div className="filter-group">
-          <label htmlFor="sort">
-            <FontAwesomeIcon icon={faSort} /> Ordenar por:
-          </label>
-          <select
-            id="sort"
-            onChange={(e) => setSortOrder(e.target.value)}
-            value={sortOrder}
-          >
-            <option value="date">Fecha</option>
-            <option value="title">Nombre</option>
-          </select>
-        </div>
-      </form>
+          <div className="filter-group">
+            <label htmlFor="sort">
+              <FontAwesomeIcon icon={faSort} /> Ordenar por:
+            </label>
+            <select
+              id="sort"
+              onChange={(e) => setSortOrder(e.target.value)}
+              value={sortOrder}
+            >
+              <option value="date">Fecha</option>
+              <option value="title">Nombre</option>
+            </select>
+          </div>
+        </form>
 
-      {filteredAndSortedEvents.length === 0 ? (
-        <p>No hay eventos disponibles.</p>
-      ) : (
-        <ul>
-          {filteredAndSortedEvents.map((event) => {
-            // Buscar el nombre de la ciudad correspondiente
-            const cityObj = cities.find((city) => city.id === event.cityId);
-            const cityName = cityObj ? cityObj.name : "No especificada";
+        {filteredAndSortedEvents.length === 0 ? (
+          <p>No hay eventos disponibles.</p>
+        ) : (
+          <ul>
+            {filteredAndSortedEvents.map((event) => {
+              // Buscar el nombre de la ciudad correspondiente
+              const cityObj = cities.find((city) => city.id === event.cityId);
+              const cityName = cityObj ? cityObj.name : "No especificada";
 
-            // Verificar si el usuario está inscrito
-            const isInscribed =
-              event.attendees && Array.isArray(event.attendees)
-                ? event.attendees.map(String).includes(String(user.id))
-                : false;
+              // Verificar si el usuario está inscrito
+              const isInscribed =
+                event.attendees && Array.isArray(event.attendees)
+                  ? event.attendees.map(String).includes(String(user.id))
+                  : false;
 
-            // Determinar si el evento ha finalizado
-            const isFinished = new Date(event.date) < new Date();
+              // Determinar si el evento ha finalizado
+              const isFinished = new Date(event.date) < new Date();
 
-            return (
-              <li key={event.id} className="event-card">
-                <h3>{event.title}</h3>
-                <p>{event.description}</p>
-                <p>
-                  <strong>Ciudad:</strong> {cityName} -{" "}
-                  <strong>Dirección:</strong> {event.place}
-                </p>
-                <p>
-                  <strong>Fecha:</strong>{" "}
-                  {new Date(event.date).toLocaleDateString()}
-                </p>
-                <Link to={`/events/${event.id}`}>Ver detalles</Link>
-                {/* Mostrar el enlace "Editar" solo si el evento fue creado por el usuario actual */}
-                {user &&
-                  event.user &&
-                  user.username &&
-                  event.user.trim().toLowerCase() ===
-                    user.username.trim().toLowerCase() && (
-                    <Link
-                      to={`/meetups/form/${event.id}`}
-                      style={{ marginLeft: "1em" }}
+              return (
+                <li key={event.id} className="event-card">
+                  <h3>{event.title}</h3>
+                  <p>{event.description}</p>
+                  <p>
+                    <strong>Ciudad:</strong> {cityName} -{" "}
+                    <strong>Dirección:</strong> {event.place}
+                  </p>
+                  <p>
+                    <strong>Fecha:</strong>{" "}
+                    {new Date(event.date).toLocaleDateString()}
+                  </p>
+                  <Link to={`/events/${event.id}`}>Ver detalles</Link>
+                  {/* Mostrar el enlace "Editar" solo si el evento fue creado por el usuario actual */}
+                  {user &&
+                    event.user &&
+                    user.username &&
+                    event.user.trim().toLowerCase() ===
+                      user.username.trim().toLowerCase() && (
+                      <Link
+                        to={`/meetups/form/${event.id}`}
+                        style={{ marginLeft: "1em" }}
+                      >
+                        Editar
+                      </Link>
+                    )}
+                  {isInscribed ? (
+                    <span
+                      style={{ marginLeft: "0.5em", color: "green" }}
+                      title="Ya inscrito"
                     >
-                      Editar
-                    </Link>
+                      <FontAwesomeIcon icon={faCheckCircle} /> Inscrito
+                    </span>
+                  ) : (
+                    <span
+                      style={{ marginLeft: "0.5em", color: "red" }}
+                      title="No inscrito"
+                    >
+                      <FontAwesomeIcon icon={faExclamationCircle} /> No inscrito
+                    </span>
                   )}
-                {isInscribed ? (
-                  <span
-                    style={{ marginLeft: "0.5em", color: "green" }}
-                    title="Ya inscrito"
-                  >
-                    <FontAwesomeIcon icon={faCheckCircle} /> Inscrito
-                  </span>
-                ) : (
-                  <span
-                    style={{ marginLeft: "0.5em", color: "red" }}
-                    title="No inscrito"
-                  >
-                    <FontAwesomeIcon icon={faExclamationCircle} /> No inscrito
-                  </span>
-                )}
-                {isFinished && (
-                  <span
-                    style={{ marginLeft: "0.5em", color: "gray" }}
-                    title="Evento finalizado"
-                  >
-                    (Finalizado)
-                  </span>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                  {isFinished && (
+                    <span
+                      style={{ marginLeft: "0.5em", color: "gray" }}
+                      title="Evento finalizado"
+                    >
+                      (Finalizado)
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
     </div>
   );
 };
