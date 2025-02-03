@@ -29,15 +29,36 @@ export const detailEvent = async (req, res) => {
     }
 
     const pool = await getPool();
-    const [event] = await pool.query("SELECT * FROM events WHERE id = ?", [
+    const [eventRows] = await pool.query("SELECT * FROM events WHERE id = ?", [
       eventId,
     ]);
 
-    if (event.length === 0) {
+    if (eventRows.length === 0) {
       console.log(`Evento con ID ${eventId} no encontrado.`);
       return res.status(404).json({ error: "Evento no encontrado." });
     }
 
+    // Parsear el campo 'attendees'
+    let parsedAttendees = [];
+    const rawAttendees = eventRows[0].attendees;
+    if (rawAttendees) {
+      if (typeof rawAttendees === "string") {
+        try {
+          parsedAttendees = JSON.parse(rawAttendees);
+          if (!Array.isArray(parsedAttendees)) {
+            parsedAttendees = [];
+          }
+        } catch (e) {
+          console.error("Error al parsear 'attendees':", e);
+          parsedAttendees = [];
+        }
+      } else if (Array.isArray(rawAttendees)) {
+        parsedAttendees = rawAttendees;
+      }
+    }
+    console.log("Attendees parseados:", parsedAttendees);
+
+    // Obtener comentarios relacionados con el evento
     const [comments] = await pool.query(
       `SELECT 
          event_ratings.user_id, 
@@ -50,10 +71,16 @@ export const detailEvent = async (req, res) => {
       [id]
     );
 
-    console.log(`Detalles del evento con ID ${eventId}:`, event[0]);
+    console.log(`Detalles del evento con ID ${eventId}:`, eventRows[0]);
     console.log("Comentarios recuperados:", comments);
 
-    return res.status(200).json({ event: { ...event[0], comments } });
+    return res.status(200).json({
+      event: {
+        ...eventRows[0],
+        attendees: parsedAttendees,
+        comments,
+      },
+    });
   } catch (err) {
     console.error("Error en el controlador de detalles del evento:", err);
     return res.status(500).json({ error: "Error interno del servidor." });
@@ -75,8 +102,6 @@ export const getCities = async (req, res) => {
       "SELECT id, name FROM cities ORDER BY name"
     );
     console.log("Ciudades recuperadas:", cities);
-
-    // Se devuelve la lista de ciudades tal como objetos con id y name
     res.status(200).json({ cities });
   } catch (error) {
     console.error("Error al obtener las ciudades:", error.message);
@@ -98,7 +123,6 @@ export const getThemes = async (req, res) => {
       "SELECT DISTINCT id, name FROM themes ORDER BY name"
     );
     console.log("Temáticas recuperadas:", themes);
-
     return res.status(200).json({ themes });
   } catch (error) {
     console.error("Error al obtener las temáticas:", error.message);

@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useUserContext } from "../context/UserContext";
 
 const EventDetail = () => {
   const { id } = useParams();
-  const { authenticatedFetch } = useUserContext();
+  const { authenticatedFetch, user } = useUserContext();
+  console.log("User en EventDetail:", user);
   const [event, setEvent] = useState(null);
-  const [cities, setCities] = useState([]); // Estado para las ciudades
+  const [cities, setCities] = useState([]);
   const [rating, setRating] = useState("");
   const [comment, setComment] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
+  // Cargar detalles del evento
   useEffect(() => {
     const fetchEventDetails = async () => {
       console.log("Cargando detalles del evento...");
@@ -25,6 +27,7 @@ const EventDetail = () => {
         }
         console.log("Detalles del evento cargados:", data.event);
         setEvent(data.event);
+        console.log("Attendees recibidos:", data.event.attendees);
       } catch (err) {
         setError(
           err.message ||
@@ -33,31 +36,60 @@ const EventDetail = () => {
         console.error("Error al cargar los detalles del evento:", err);
       }
     };
-
     fetchEventDetails();
   }, [id, authenticatedFetch]);
 
-  // Cargar la lista de ciudades para obtener el nombre correspondiente al cityId
+  // Cargar la lista de ciudades para mostrar el nombre
   useEffect(() => {
     const fetchCities = async () => {
       try {
         const data = await authenticatedFetch(
           "http://localhost:5000/api/meetups/cities"
         );
-        // Se espera que data tenga la estructura: { cities: [ { id, name }, ... ] }
         setCities(data.cities);
       } catch (error) {
         console.error("Error al cargar ciudades:", error);
       }
     };
-
     fetchCities();
   }, [authenticatedFetch]);
 
-  // Definir isEventFinished para determinar si el evento ya ha finalizado.
+  // Determinar si el evento ya ha finalizado
   const isEventFinished = event ? new Date(event.date) < new Date() : false;
 
-  // Buscar el nombre de la ciudad a partir del cityId del evento
+  // Aseguramos que event.attendees sea un arreglo
+  const attendeesArray =
+    event && Array.isArray(event.attendees) ? event.attendees : [];
+  // Determinar si el usuario está inscrito (comparando en forma de cadena)
+  const isInscribed = attendeesArray.map(String).includes(String(user.id));
+
+  // Debug: Mostrar en consola el arreglo de asistentes y el ID del usuario
+  console.log("attendeesArray:", attendeesArray, "user.id:", user.id);
+
+  // Función para inscribirse al evento
+  const handleSignUp = async () => {
+    try {
+      await authenticatedFetch(
+        `http://localhost:5000/api/meetups/${id}/signup`,
+        {
+          method: "POST",
+        }
+      );
+      alert("Inscripción exitosa");
+      // Recargar detalles del evento para actualizar la lista de asistentes
+      const updatedData = await authenticatedFetch(
+        `http://localhost:5000/api/meetups/${id}/detail`
+      );
+      console.log("Evento actualizado tras inscripción:", updatedData.event);
+      setEvent(updatedData.event);
+      console.log("Evento actualizado tras inscripción:", updatedData.event);
+    } catch (err) {
+      console.error("Error al inscribirse en el evento:", err);
+      alert(err.message || "Error al inscribirse en el evento");
+    }
+  };
+
+  // Buscar el nombre de la ciudad correspondiente
   const cityName =
     event && cities.length > 0
       ? cities.find((city) => city.id === event.cityId)?.name ||
@@ -105,20 +137,20 @@ const EventDetail = () => {
             <strong>Fecha:</strong> {new Date(event.date).toLocaleDateString()}
           </p>
 
-          {/* Mostrar comentarios */}
+          {/* Sección de comentarios: se muestran siempre */}
           <div className="comments-section">
             <h3>Comentarios:</h3>
             {event.comments && event.comments.length > 0 ? (
               <ul>
-                {event.comments.map((comment, index) => (
+                {event.comments.map((comm, index) => (
                   <li key={index} className="comment-card">
                     <p>
                       <strong>
-                        {comment.user_name || "Usuario desconocido"}:
+                        {comm.user_name || "Usuario desconocido"}:
                       </strong>{" "}
-                      {comment.rating} ⭐
+                      {comm.rating} ⭐
                     </p>
-                    <p>{comment.comment}</p>
+                    <p>{comm.comment}</p>
                   </li>
                 ))}
               </ul>
@@ -127,36 +159,58 @@ const EventDetail = () => {
             )}
           </div>
 
-          {/* Mostrar formulario de valoración solo si el evento ya ha finalizado */}
-          {isEventFinished ? (
-            <form onSubmit={handleSubmit} className="rating-form">
-              <h3>Valorar y comentar evento</h3>
-              <div>
-                <label htmlFor="rating">Puntuación (1-5):</label>
-                <input
-                  type="number"
-                  id="rating"
-                  value={rating}
-                  onChange={(e) => setRating(e.target.value)}
-                  min="1"
-                  max="5"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="comment">Comentario:</label>
-                <textarea
-                  id="comment"
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  maxLength="300"
-                  required
-                ></textarea>
-              </div>
-              <button type="submit">Enviar valoración</button>
-            </form>
+          {/* Mostrar botón para inscribirse si no está inscrito */}
+          {!isInscribed ? (
+            <button onClick={handleSignUp} style={{ marginBottom: "1em" }}>
+              Inscribirse en el evento
+            </button>
           ) : (
-            <p>El evento aún no ha finalizado, no se puede valorar.</p>
+            <button
+              disabled
+              style={{
+                marginBottom: "1em",
+                backgroundColor: "#ccc",
+                cursor: "not-allowed",
+              }}
+            >
+              Inscrito
+            </button>
+          )}
+
+          {/* Mostrar formulario de valoración solo si el usuario está inscrito */}
+          {isInscribed ? (
+            isEventFinished ? (
+              <form onSubmit={handleSubmit} className="rating-form">
+                <h3>Valorar y comentar evento</h3>
+                <div>
+                  <label htmlFor="rating">Puntuación (1-5):</label>
+                  <input
+                    type="number"
+                    id="rating"
+                    value={rating}
+                    onChange={(e) => setRating(e.target.value)}
+                    min="1"
+                    max="5"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="comment">Comentario:</label>
+                  <textarea
+                    id="comment"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    maxLength="300"
+                    required
+                  ></textarea>
+                </div>
+                <button type="submit">Enviar valoración</button>
+              </form>
+            ) : (
+              <p>El evento aún no ha finalizado, no se puede valorar.</p>
+            )
+          ) : (
+            <p>Debes inscribirte para poder valorar este evento.</p>
           )}
 
           <button onClick={() => navigate("/")} className="back-button">
