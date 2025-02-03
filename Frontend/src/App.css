@@ -30,3 +30,35 @@ button {
   cursor: pointer;
   border-radius: 4px;
 }
+
+/**TARJETAS DE EVENTOS**/
+/* .event-card {
+  position: relative;
+  border: 1px solid #ccc;
+  padding: 1em;
+  margin-bottom: 1em;
+}
+
+.state-indicator {
+  position: absolute;
+  top: 0.5em;
+  right: 0.5em;
+  padding: 0.2em 0.5em;
+  border-radius: 0.3em;
+  font-size: 0.8em;
+  color: #fff;
+}
+
+.state-indicator.inscribed {
+  background-color: green;
+}
+
+.state-indicator.not-inscribed {
+  background-color: red;
+}
+
+.finished-indicator {
+  margin-left: 0.5em;
+  color: gray;
+  font-size: 0.9em;
+} */

@@ -2,34 +2,34 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUserContext } from "../context/UserContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSort } from "@fortawesome/free-solid-svg-icons";
+import {
+  faSort,
+  faCheckCircle,
+  faExclamationCircle,
+} from "@fortawesome/free-solid-svg-icons";
 
 const EventList = () => {
+  // Estados necesarios
   const [events, setEvents] = useState([]);
   const [cities, setCities] = useState([]);
-  const [themes, setThemes] = useState([]); // Estado para las temáticas
+  const [themes, setThemes] = useState([]);
   const [error, setError] = useState("");
-  const [filterCity, setFilterCity] = useState(""); // Filtro por ciudad (guardará el id)
-  const [filterTheme, setFilterTheme] = useState(""); // Filtro por temática
-  const [filterDate, setFilterDate] = useState("all"); // Filtro de fechas
-  const [sortOrder, setSortOrder] = useState("date"); // Ordenación
-  const { token, authenticatedFetch } = useUserContext();
+  const [filterCity, setFilterCity] = useState("");
+  const [filterTheme, setFilterTheme] = useState("");
+  const [filterDate, setFilterDate] = useState("all");
+  const [sortOrder, setSortOrder] = useState("date");
+
+  const { token, authenticatedFetch, user } = useUserContext();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!token) {
       console.log("Token no válido o ausente, redirigiendo al login...");
       navigate("/login");
-      return; // Detiene la ejecución del useEffect si no hay token
+      return;
     }
 
     console.log("Token válido, procediendo a cargar datos...");
-    // Cargar eventos, ciudades y temáticas
-    const fetchData = async () => {
-      await fetchEvents();
-      await fetchCities();
-      await fetchThemes();
-    };
 
     const fetchEvents = async () => {
       try {
@@ -85,7 +85,9 @@ const EventList = () => {
       }
     };
 
-    fetchData();
+    fetchEvents();
+    fetchCities();
+    fetchThemes();
   }, [authenticatedFetch, navigate, token]);
 
   // Filtrar y ordenar eventos
@@ -190,8 +192,17 @@ const EventList = () => {
             const cityObj = cities.find((city) => city.id === event.cityId);
             const cityName = cityObj ? cityObj.name : "No especificada";
 
+            // Verificar si el usuario está inscrito
+            const isInscribed =
+              event.attendees && Array.isArray(event.attendees)
+                ? event.attendees.map(String).includes(String(user.id))
+                : false;
+
+            // Determinar si el evento ha finalizado
+            const isFinished = new Date(event.date) < new Date();
+
             return (
-              <li key={event.id}>
+              <li key={event.id} className="event-card">
                 <h3>{event.title}</h3>
                 <p>{event.description}</p>
                 <p>
@@ -202,6 +213,25 @@ const EventList = () => {
                   <strong>Fecha:</strong>{" "}
                   {new Date(event.date).toLocaleDateString()}
                 </p>
+                {/* Indicador de inscripción en línea, como antes */}
+                {isInscribed ? (
+                  <span style={{ color: "green" }} title="Ya inscrito">
+                    <FontAwesomeIcon icon={faCheckCircle} /> Inscrito
+                  </span>
+                ) : (
+                  <span style={{ color: "red" }} title="No inscrito">
+                    <FontAwesomeIcon icon={faExclamationCircle} /> No inscrito
+                  </span>
+                )}
+                {isFinished && (
+                  <span
+                    style={{ marginLeft: "0.5em", color: "gray" }}
+                    title="Evento finalizado"
+                  >
+                    (Finalizado)
+                  </span>
+                )}
+                <br />
                 <Link to={`/events/${event.id}`}>Ver detalles</Link>
               </li>
             );
