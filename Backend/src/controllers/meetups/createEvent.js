@@ -19,7 +19,7 @@ const isFutureDate = (date) => {
  * - title: string (Título del evento)
  * - description: string (Descripción del evento)
  * - place: string (Dirección del evento)
- * - date: date (Fecha y hora del evento; se validará que no sea en el futuro)
+ * - date: date (Fecha y hora del evento; se validará que sea en el futuro)
  * - user: string (Usuario asociado al evento)
  * - type: string (Tipo de evento)
  * - cityId: number (ID de la ciudad)
@@ -62,9 +62,12 @@ export const createEvents = async (req, res) => {
       attendees,
     } = req.body;
 
-    // Validar que la fecha no sea en el futuro
-    if (isFutureDate(moment(date))) {
-      return res.status(400).send("Event has not occurred yet");
+    // Validar que la fecha sea en el futuro
+    // Ahora se rechaza la solicitud si la fecha NO es futura
+    if (!isFutureDate(moment(date))) {
+      return res
+        .status(400)
+        .json({ error: "Event date must be in the future" });
     }
 
     // Asegurarse de que 'attendees' sea un arreglo; si no se envía o no es un arreglo, se inicializa como vacío

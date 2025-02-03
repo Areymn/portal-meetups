@@ -125,7 +125,7 @@ const App = () => {
               }
             />
             <Route
-              path="/meetups/form"
+              path="/meetups/form/:id?"
               element={
                 <ProtectedRoute>
                   <MeetupPage />

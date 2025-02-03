@@ -46,7 +46,9 @@ const ProfilePage = () => {
 
   return (
     <div className="profile-container">
-      <h1 className="profile-title">Perfil de Usuario</h1>
+      <h1 className="profile-title">
+        {user.name} {user.last_name}
+      </h1>
       <div className="profile-info">
         <img
           key={user.avatar}
@@ -54,9 +56,7 @@ const ProfilePage = () => {
           alt="Avatar de usuario"
           className="profile-avatar"
         />
-        <h2>
-          {user.name} {user.last_name}
-        </h2>
+        <h2>{user.username}</h2>
         <p>{user.email}</p>
       </div>
 
