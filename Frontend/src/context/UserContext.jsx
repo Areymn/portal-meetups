@@ -6,8 +6,9 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState("");
   const [passwordResetCompleted, setPasswordResetCompleted] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // 🔄 Cargar usuario y token desde localStorage al iniciar la aplicación
+  // Cargar usuario y token desde localStorage al iniciar la aplicación
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     const savedToken = localStorage.getItem("token");
@@ -22,57 +23,58 @@ export const UserProvider = ({ children }) => {
         setUser(parsedUser);
         setToken(savedToken);
         console.log(
-          "✅ Usuario y token cargados en `UserContext`:",
+          "✅ Usuario y token cargados en UserContext:",
           parsedUser,
           savedToken
         );
       } catch (error) {
-        console.error(
-          "❌ Error al parsear usuario desde `localStorage`:",
-          error
-        );
+        console.error("❌ Error al parsear usuario desde localStorage:", error);
       }
     } else {
-      console.log("⚠️ No se encontraron usuario o token en `localStorage`.");
+      console.log("⚠️ No se encontraron usuario o token en localStorage.");
     }
+    setLoading(false);
   }, []);
 
-  // ✅ Nueva función para recuperar datos actualizados del usuario
+  // Función para recuperar datos actualizados del usuario
   const fetchUserData = async () => {
     try {
       console.log("📡 Solicitando datos del usuario...");
-      const response = await fetch("http://localhost:5000/api/me", { headers });
-
-      console.log("🔄 Respuesta del servidor en `fetchUserData`:", response);
+      const tokenLocal = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/users/me", {
+        headers: {
+          Authorization: `Bearer ${tokenLocal}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
+        alert(
+          "⚠️ No se pudo obtener la sesión. Revisa tu conexión o inicia sesión de nuevo."
+        );
+        return;
       }
 
       const data = await response.json();
       setUser(data);
-      console.log("✅ Datos de usuario cargados correctamente:", data);
+      console.log("✅ Usuario obtenido correctamente:", data);
     } catch (error) {
       console.error("❌ Error al recuperar usuario:", error);
     }
   };
 
-  // ✅ Login con persistencia en localStorage
+  // Función login con persistencia en localStorage
   const login = async (userData, userToken) => {
     console.log("🔐 Usuario recibido en login:", userData);
-
     setUser(userData);
     setToken(userToken);
     localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("token", userToken);
-
     console.log("✅ Usuario guardado en localStorage correctamente.");
-
-    // 🔄 Al iniciar sesión, obtener datos actualizados
     fetchUserData();
   };
 
-  // 🔓 Logout: Elimina usuario y token
+  // Función logout: elimina usuario y token
   const logout = () => {
     console.log("🚪 Cerrando sesión...");
     setUser(null);
@@ -82,11 +84,10 @@ export const UserProvider = ({ children }) => {
     localStorage.removeItem("token");
   };
 
-  // 📡 Fetch autenticado con el token desde localStorage
+  // Función authenticatedFetch que envía solicitudes autenticadas
   const authenticatedFetch = async (url, options = {}) => {
     const storedToken = localStorage.getItem("token");
     const finalToken = token || storedToken;
-
     console.log("🔍 Token obtenido para authenticatedFetch:", finalToken);
 
     if (!finalToken) {
@@ -94,12 +95,12 @@ export const UserProvider = ({ children }) => {
       throw new Error("No hay token de autenticación.");
     }
 
+    // Definir headers de forma correcta
     const headers = {
       ...options.headers,
       Authorization: `Bearer ${finalToken}`,
     };
 
-    // ❗ Si el body es JSON, asegurar que el Content-Type esté correctamente definido
     if (options.body && !(options.body instanceof FormData)) {
       headers["Content-Type"] = "application/json";
     }
@@ -118,12 +119,12 @@ export const UserProvider = ({ children }) => {
     return response.json();
   };
 
-  // 🔄 Actualizar usuario en el contexto y localStorage
+  // Función para actualizar el usuario en el contexto y localStorage
   const updateUser = (updatedUserData) => {
     setUser((prevUser) => {
       const newUser = {
         ...prevUser,
-        avatar: updatedUserData.avatar || "/default-avatar.png", // Si no tiene avatar, usa el por defecto
+        avatar: updatedUserData.avatar || "/default-avatar.png",
       };
       localStorage.setItem("user", JSON.stringify(newUser));
       return newUser;
@@ -143,7 +144,8 @@ export const UserProvider = ({ children }) => {
         passwordResetCompleted,
         setPasswordResetCompleted,
         authenticatedFetch,
-        fetchUserData, // 🔄 Se expone para poder usarse en otros componentes
+        fetchUserData,
+        loading,
       }}
     >
       {children}
@@ -154,3 +156,5 @@ export const UserProvider = ({ children }) => {
 export const useUserContext = () => {
   return useContext(UserContext);
 };
+
+export default UserContext;

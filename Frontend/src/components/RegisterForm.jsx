@@ -48,66 +48,68 @@ const RegisterForm = () => {
   };
 
   return (
-    <div className="form-container">
-      <h2>Registro de Usuario</h2>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Nombre de Usuario
-          <input
-            type="text"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <label>
-          Correo Electrónico
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <label>
-          Contraseña
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <label>
-          Nombre
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <label>
-          Apellido
-          <input
-            type="text"
-            name="last_name"
-            value={formData.last_name}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        {error && <p className="error">{error}</p>}
-        <button type="submit">Registrarse</button>
-      </form>
-      <div className="back-to-login">
-        <p>
-          ¿Ya tienes cuenta? <Link to="/login">Inicia sesión aquí</Link>
-        </p>
+    <div className="common-page">
+      <div className="form-container">
+        <h2>Registro de Usuario</h2>
+        <form onSubmit={handleSubmit}>
+          <label>
+            Nombre de Usuario
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+            />
+          </label>
+          <label>
+            Correo Electrónico
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </label>
+          <label>
+            Contraseña
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </label>
+          <label>
+            Nombre
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
+          </label>
+          <label>
+            Apellido
+            <input
+              type="text"
+              name="last_name"
+              value={formData.last_name}
+              onChange={handleChange}
+              required
+            />
+          </label>
+          {error && <p className="error">{error}</p>}
+          <button type="submit">Registrarse</button>
+        </form>
+        <div className="back-to-login">
+          <p>
+            ¿Ya tienes cuenta? <Link to="/login">Inicia sesión aquí</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

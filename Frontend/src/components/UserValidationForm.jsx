@@ -47,29 +47,31 @@ const UserValidationForm = () => {
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit} className="user-validation-form">
-        <div>
-          <label htmlFor="email">Email:</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="code">Código de Validación:</label>
-          <input
-            id="code"
-            type="text"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-          />
-        </div>
-        <button type="submit">Validar</button>
-      </form>
-      {message && <p>{message}</p>} {/* Mostramos el mensaje al usuario */}
+    <div className="common-page">
+      <div>
+        <form onSubmit={handleSubmit} className="user-validation-form">
+          <div>
+            <label htmlFor="email">Email:</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="code">Código de Validación:</label>
+            <input
+              id="code"
+              type="text"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+            />
+          </div>
+          <button type="submit">Validar</button>
+        </form>
+        {message && <p>{message}</p>} {/* Mostramos el mensaje al usuario */}
+      </div>
     </div>
   );
 };

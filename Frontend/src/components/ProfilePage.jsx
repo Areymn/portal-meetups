@@ -45,29 +45,31 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="profile-container">
-      <h1 className="profile-title">
-        {user.name} {user.last_name}
-      </h1>
-      <div className="profile-info">
-        <img
-          key={user.avatar}
-          src={avatarSrc}
-          alt="Avatar de usuario"
-          className="profile-avatar"
-        />
-        <h2>{user.username}</h2>
-        <p>{user.email}</p>
-      </div>
+    <div className="common-page">
+      <div className="profile-container">
+        <h1 className="profile-title">
+          {user.name} {user.last_name}
+        </h1>
+        <div className="profile-info">
+          <img
+            key={user.avatar}
+            src={avatarSrc}
+            alt="Avatar de usuario"
+            className="profile-avatar"
+          />
+          <h2>{user.username}</h2>
+          <p>{user.email}</p>
+        </div>
 
-      <UploadAvatar />
-      <ProfileForm />
-      <ChangePasswordForm />
+        <UploadAvatar />
+        <ProfileForm />
+        <ChangePasswordForm />
 
-      <div className="">
-        <button onClick={handleDeleteAccount} className="delete-account-btn">
-          Eliminar Cuenta
-        </button>
+        <div className="">
+          <button onClick={handleDeleteAccount} className="delete-account-btn">
+            Eliminar Cuenta
+          </button>
+        </div>
       </div>
     </div>
   );

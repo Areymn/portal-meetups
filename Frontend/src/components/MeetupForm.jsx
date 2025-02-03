@@ -134,96 +134,102 @@ const MeetupForm = ({ onSubmit }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      {errorOptions && <p style={{ color: "red" }}>{errorOptions}</p>}
+    <div className="common-page">
+      <form onSubmit={handleSubmit}>
+        {errorOptions && <p style={{ color: "red" }}>{errorOptions}</p>}
 
-      {/* Mostrar la información del usuario (no editable) en la parte superior */}
-      <div>
-        <p>
-          <strong>Creado por:</strong> {userField}
-        </p>
-      </div>
+        {/* Mostrar la información del usuario (no editable) en la parte superior */}
+        <div>
+          <p>
+            <strong>Creado por:</strong> {userField}
+          </p>
+        </div>
 
-      <div>
-        <label>Título</label>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label>Descripción</label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label>Fecha y hora</label>
-        <input
-          type="datetime-local"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label>Tipo</label>
-        <select value={type} onChange={(e) => setType(e.target.value)} required>
-          <option value="">Selecciona un tipo</option>
-          {meetupTypes.map((mt) => (
-            <option key={mt.value} value={mt.value}>
-              {mt.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label>Ciudad</label>
-        <select
-          value={cityId}
-          onChange={(e) => setCityId(e.target.value)}
-          required
-        >
-          <option value="">Selecciona una ciudad</option>
-          {cities.map((city) => (
-            <option key={city.id} value={city.id}>
-              {city.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label>Dirección</label>
-        <input
-          type="text"
-          value={place}
-          onChange={(e) => setPlace(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label>Tema</label>
-        <select
-          value={themeId}
-          onChange={(e) => setThemeId(e.target.value)}
-          required
-        >
-          <option value="">Selecciona un tema</option>
-          {themes.map((theme) => (
-            <option key={theme.id} value={theme.id}>
-              {theme.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <button type="submit">
-        {id ? "Actualizar Meetup" : "Guardar Meetup"}
-      </button>
-    </form>
+        <div>
+          <label>Título</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Descripción</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Fecha y hora</label>
+          <input
+            type="datetime-local"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Tipo</label>
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            required
+          >
+            <option value="">Selecciona un tipo</option>
+            {meetupTypes.map((mt) => (
+              <option key={mt.value} value={mt.value}>
+                {mt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label>Ciudad</label>
+          <select
+            value={cityId}
+            onChange={(e) => setCityId(e.target.value)}
+            required
+          >
+            <option value="">Selecciona una ciudad</option>
+            {cities.map((city) => (
+              <option key={city.id} value={city.id}>
+                {city.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label>Dirección</label>
+          <input
+            type="text"
+            value={place}
+            onChange={(e) => setPlace(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Tema</label>
+          <select
+            value={themeId}
+            onChange={(e) => setThemeId(e.target.value)}
+            required
+          >
+            <option value="">Selecciona un tema</option>
+            {themes.map((theme) => (
+              <option key={theme.id} value={theme.id}>
+                {theme.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <button type="submit">
+          {id ? "Actualizar Meetup" : "Guardar Meetup"}
+        </button>
+      </form>
+    </div>
   );
 };
 

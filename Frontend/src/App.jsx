@@ -6,7 +6,7 @@ import {
   Link,
   useLocation,
 } from "react-router-dom";
-import "./styles.css";
+import "./styles/global.css";
 import { UserProvider, useUserContext } from "./context/UserContext";
 import MeetupForm from "./components/MeetupForm";
 import MeetupPage from "./components/MeetupPage";

@@ -47,53 +47,55 @@ const ProfileForm = () => {
   };
 
   return (
-    <form className="profile-form" onSubmit={handleSubmit}>
-      <div>
-        <label>Contraseña actual</label>
-        <input
-          type="password"
-          name="currentPassword"
-          value={formData.currentPassword}
-          onChange={(e) =>
-            setFormData({ ...formData, currentPassword: e.target.value })
-          }
-          placeholder="Contraseña actual"
-          required
-        />
-      </div>
-      <div>
-        <label>Nombre:</label>
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-        />
-      </div>
-      <div>
-        <label>Apellido:</label>
-        <input
-          type="text"
-          name="last_name"
-          value={formData.last_name}
-          onChange={handleChange}
-        />
-      </div>
-      <div>
-        <label>Correo Electrónico:</label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="profile-buttons">
-        <button type="submit" disabled={loading}>
-          {loading ? "Actualizando..." : "Actualizar Perfil"}
-        </button>
-      </div>
-    </form>
+    <div className="common-page">
+      <form className="profile-form" onSubmit={handleSubmit}>
+        <div>
+          <label>Contraseña actual</label>
+          <input
+            type="password"
+            name="currentPassword"
+            value={formData.currentPassword}
+            onChange={(e) =>
+              setFormData({ ...formData, currentPassword: e.target.value })
+            }
+            placeholder="Contraseña actual"
+            required
+          />
+        </div>
+        <div>
+          <label>Nombre:</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Apellido:</label>
+          <input
+            type="text"
+            name="last_name"
+            value={formData.last_name}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label>Correo Electrónico:</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+        </div>
+        <div className="profile-buttons">
+          <button type="submit" disabled={loading}>
+            {loading ? "Actualizando..." : "Actualizar Perfil"}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 

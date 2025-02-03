@@ -119,22 +119,25 @@ const PasswordResetForm = () => {
   }, [passwordResetCompleted]);
 
   return (
-    <div className="form-container">
-      <h2>Cambio de Contraseña</h2>
-      {message && <p className="success">{message}</p>} {/* Mensaje de éxito */}
-      {error && <p className="error">{error}</p>} {/* Mensaje de error */}
-      <form onSubmit={handleSubmit}>
-        <label>
-          Nueva Contraseña
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
-          />
-        </label>
-        <button type="submit">Cambiar Contraseña</button>
-      </form>
+    <div className="common-page">
+      <div className="form-container">
+        <h2>Cambio de Contraseña</h2>
+        {message && <p className="success">{message}</p>}{" "}
+        {/* Mensaje de éxito */}
+        {error && <p className="error">{error}</p>} {/* Mensaje de error */}
+        <form onSubmit={handleSubmit}>
+          <label>
+            Nueva Contraseña
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+            />
+          </label>
+          <button type="submit">Cambiar Contraseña</button>
+        </form>
+      </div>
     </div>
   );
 };

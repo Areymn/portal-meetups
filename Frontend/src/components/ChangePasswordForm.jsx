@@ -51,44 +51,48 @@ const ChangePasswordForm = () => {
   };
 
   return (
-    <form className="profile-form" onSubmit={handleSubmit}>
-      <h3>Cambiar Contraseña</h3>
-      <div>
-        <label>Contraseña Actual:</label>
-        <input
-          type="password"
-          name="currentPassword"
-          value={formData.currentPassword}
-          onChange={handleChange}
-          required
-        />
+    <div className="common-page">
+      <div className="form-container">
+        <form className="profile-form" onSubmit={handleSubmit}>
+          <h3>Cambiar Contraseña</h3>
+          <div>
+            <label>Contraseña Actual:</label>
+            <input
+              type="password"
+              name="currentPassword"
+              value={formData.currentPassword}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div>
+            <label>Nueva Contraseña:</label>
+            <input
+              type="password"
+              name="newPassword"
+              value={formData.newPassword}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div>
+            <label>Confirmar Nueva Contraseña:</label>
+            <input
+              type="password"
+              name="confirmNewPassword"
+              value={formData.confirmNewPassword}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="profile-buttons">
+            <button type="submit" disabled={loading}>
+              {loading ? "Cambiando..." : "Cambiar Contraseña"}
+            </button>
+          </div>
+        </form>
       </div>
-      <div>
-        <label>Nueva Contraseña:</label>
-        <input
-          type="password"
-          name="newPassword"
-          value={formData.newPassword}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <label>Confirmar Nueva Contraseña:</label>
-        <input
-          type="password"
-          name="confirmNewPassword"
-          value={formData.confirmNewPassword}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className="profile-buttons">
-        <button type="submit" disabled={loading}>
-          {loading ? "Cambiando..." : "Cambiar Contraseña"}
-        </button>
-      </div>
-    </form>
+    </div>
   );
 };
 

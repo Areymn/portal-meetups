@@ -9,10 +9,12 @@ const PasswordResetSuccess = () => {
   };
 
   return (
-    <div className="form-container">
-      <h2>¡Contraseña Restablecida!</h2>
-      <p>Tu contraseña ha sido restablecida exitosamente.</p>
-      <button onClick={handleLoginRedirect}>Iniciar Sesión</button>
+    <div className="common-page">
+      <div className="form-container">
+        <h2>¡Contraseña Restablecida!</h2>
+        <p>Tu contraseña ha sido restablecida exitosamente.</p>
+        <button onClick={handleLoginRedirect}>Iniciar Sesión</button>
+      </div>
     </div>
   );
 };

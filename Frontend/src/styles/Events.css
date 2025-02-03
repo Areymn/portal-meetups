@@ -1,0 +1,211 @@
+/* events.css */
+
+/* Tarjeta de evento (mobile-first) */
+.tarjeta-evento {
+  width: 100%;
+  background: #fff;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  margin-bottom: 1.25rem; /* 20px */
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.tarjeta-evento:hover {
+  transform: translateY(-0.3125rem); /* 5px */
+  box-shadow: var(--shadow-hover);
+}
+
+/* En pantallas medianas y superiores se muestran varias columnas */
+@media (min-width: 48rem) {
+  /* 768px */
+  .tarjeta-evento {
+    width: 48%;
+    margin: 1% auto;
+  }
+}
+@media (min-width: 64rem) {
+  /* 1024px */
+  .tarjeta-evento {
+    width: 30%;
+    margin: 1.66%;
+  }
+}
+
+/* Lista de eventos */
+.event-list {
+  width: 100%;
+  max-width: 50rem; /* Aproximadamente 800px */
+  margin: 1.25rem auto;
+  padding: 1.25rem;
+  background-color: #fff;
+  border-radius: 0.5rem; /* 8px */
+  box-shadow: var(--shadow-light);
+}
+.event-list ul {
+  list-style: none;
+  padding: 0;
+}
+.event-list li {
+  margin-bottom: 1.25rem;
+  padding: 0.9375rem; /* 15px */
+  border: 0.0625rem solid #ddd;
+  border-radius: var(--border-radius);
+  background-color: #f9f9f9;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.event-list li:hover {
+  transform: translateY(-0.3125rem);
+  box-shadow: var(--shadow-hover);
+}
+.event-list h3 {
+  margin: 0 0 0.625rem; /* 10px */
+  color: #2c3e50;
+}
+.event-list p {
+  margin: 0 0 0.625rem;
+  color: #555;
+}
+.event-list a {
+  color: var(--color-primary);
+  font-weight: bold;
+}
+.event-list a:hover {
+  text-decoration: underline;
+}
+
+/* Detalle del evento */
+.event-detail {
+  width: 100%;
+  max-width: 37.5rem; /* Aproximadamente 600px */
+  margin: 1.25rem auto;
+  padding: 1.25rem;
+  background-color: #fff;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+}
+.event-detail h2 {
+  font-size: 1.375rem; /* 22px */
+  margin-bottom: 0.625rem;
+  color: #2c3e50;
+}
+.event-detail p {
+  font-size: 0.875rem; /* 14px */
+  color: #555;
+  margin-bottom: 0.625rem;
+}
+.event-detail strong {
+  color: #333;
+}
+
+/* Formulario de valoración */
+.rating-form {
+  margin-top: 1.25rem;
+  padding: 1.25rem;
+  background-color: #f9f9f9;
+  border: 0.0625rem solid #ddd;
+  border-radius: var(--border-radius);
+}
+.rating-form h3 {
+  font-size: 1.125rem; /* 18px */
+  margin-bottom: 0.9375rem; /* 15px */
+  color: #2c3e50;
+}
+.rating-form label {
+  font-size: 0.875rem;
+  color: #555;
+  margin-bottom: 0.3125rem; /* 5px */
+  display: block;
+}
+.rating-form input,
+.rating-form textarea {
+  width: 100%;
+  padding: 0.625rem; /* 10px */
+  margin-bottom: 0.9375rem; /* 15px */
+  border: 0.0625rem solid #ccc;
+  border-radius: var(--border-radius);
+}
+.rating-form button {
+  width: 100%;
+  padding: 0.625rem;
+  background-color: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  cursor: pointer;
+}
+.rating-form button:hover {
+  background-color: var(--color-primary-hover);
+}
+
+/* Filtros */
+.filter-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.9375rem; /* 15px */
+  margin: 1.25rem auto;
+  padding: 0.625rem;
+  background-color: #f9f9f9;
+  border-radius: var(--border-radius);
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+}
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.filter-group label {
+  font-size: 0.875rem;
+  font-weight: bold;
+  margin-bottom: 0.3125rem;
+  color: #333;
+}
+.filter-group select {
+  padding: 0.5rem;
+  border: 0.0625rem solid #ccc;
+  border-radius: var(--border-radius);
+  font-size: 0.875rem;
+  color: #555;
+}
+.filter-group select:hover {
+  border-color: var(--color-primary);
+}
+.filter-group select:focus {
+  border-color: var(--color-primary-hover);
+  outline: none;
+  box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.5);
+}
+.filter-form.horizontal {
+  flex-direction: row;
+}
+.filter-form.horizontal .filter-group {
+  margin: 0 0.625rem; /* 10px */
+}
+
+/* Página Not Found */
+.not-found {
+  text-align: center;
+  margin-top: 1.25rem;
+}
+.not-found h1 {
+  font-size: 2.25rem; /* 36px */
+  color: #333;
+}
+.not-found p {
+  font-size: 1.125rem; /* 18px */
+  color: #555;
+  margin: 0.625rem 0 1.25rem;
+}
+.not-found .back-home {
+  display: inline-block;
+  padding: 0.625rem 1.25rem;
+  background-color: var(--color-primary);
+  color: #fff;
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-size: 1rem;
+}
+.not-found .back-home:hover {
+  background-color: var(--color-primary-hover);
+}

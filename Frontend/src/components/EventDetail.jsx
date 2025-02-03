@@ -122,104 +122,107 @@ const EventDetail = () => {
   };
 
   return (
-    <div className="event-detail">
-      {error && <p className="error">{error}</p>}
-      {success && <p className="success">{success}</p>}
-      {event ? (
-        <div>
-          <h2>{event.title || "Sin título"}</h2>
-          <p>{event.description || "Descripción no disponible."}</p>
-          <p>
-            <strong>Ciudad:</strong> {cityName} - <strong>Dirección:</strong>{" "}
-            {event.place || "No especificada"}
-          </p>
-          <p>
-            <strong>Fecha:</strong> {new Date(event.date).toLocaleDateString()}
-          </p>
+    <div className="common-page">
+      <div className="event-detail">
+        {error && <p className="error">{error}</p>}
+        {success && <p className="success">{success}</p>}
+        {event ? (
+          <div>
+            <h2>{event.title || "Sin título"}</h2>
+            <p>{event.description || "Descripción no disponible."}</p>
+            <p>
+              <strong>Ciudad:</strong> {cityName} - <strong>Dirección:</strong>{" "}
+              {event.place || "No especificada"}
+            </p>
+            <p>
+              <strong>Fecha:</strong>{" "}
+              {new Date(event.date).toLocaleDateString()}
+            </p>
 
-          {/* Sección de comentarios: se muestran siempre */}
-          <div className="comments-section">
-            <h3>Comentarios:</h3>
-            {event.comments && event.comments.length > 0 ? (
-              <ul>
-                {event.comments.map((comm, index) => (
-                  <li key={index} className="comment-card">
-                    <p>
-                      <strong>
-                        {comm.user_name || "Usuario desconocido"}:
-                      </strong>{" "}
-                      {comm.rating} ⭐
-                    </p>
-                    <p>{comm.comment}</p>
-                  </li>
-                ))}
-              </ul>
+            {/* Sección de comentarios: se muestran siempre */}
+            <div className="comments-section">
+              <h3>Comentarios:</h3>
+              {event.comments && event.comments.length > 0 ? (
+                <ul>
+                  {event.comments.map((comm, index) => (
+                    <li key={index} className="comment-card">
+                      <p>
+                        <strong>
+                          {comm.user_name || "Usuario desconocido"}:
+                        </strong>{" "}
+                        {comm.rating} ⭐
+                      </p>
+                      <p>{comm.comment}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No hay comentarios disponibles para este evento.</p>
+              )}
+            </div>
+
+            {/* Mostrar botón para inscribirse si no está inscrito */}
+            {!isInscribed ? (
+              <button onClick={handleSignUp} style={{ marginBottom: "1em" }}>
+                Inscribirse en el evento
+              </button>
             ) : (
-              <p>No hay comentarios disponibles para este evento.</p>
+              <button
+                disabled
+                style={{
+                  marginBottom: "1em",
+                  backgroundColor: "#ccc",
+                  cursor: "not-allowed",
+                }}
+              >
+                Inscrito
+              </button>
             )}
-          </div>
 
-          {/* Mostrar botón para inscribirse si no está inscrito */}
-          {!isInscribed ? (
-            <button onClick={handleSignUp} style={{ marginBottom: "1em" }}>
-              Inscribirse en el evento
-            </button>
-          ) : (
-            <button
-              disabled
-              style={{
-                marginBottom: "1em",
-                backgroundColor: "#ccc",
-                cursor: "not-allowed",
-              }}
-            >
-              Inscrito
-            </button>
-          )}
-
-          {/* Mostrar formulario de valoración solo si el usuario está inscrito */}
-          {isInscribed ? (
-            isEventFinished ? (
-              <form onSubmit={handleSubmit} className="rating-form">
-                <h3>Valorar y comentar evento</h3>
-                <div>
-                  <label htmlFor="rating">Puntuación (1-5):</label>
-                  <input
-                    type="number"
-                    id="rating"
-                    value={rating}
-                    onChange={(e) => setRating(e.target.value)}
-                    min="1"
-                    max="5"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="comment">Comentario:</label>
-                  <textarea
-                    id="comment"
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    maxLength="300"
-                    required
-                  ></textarea>
-                </div>
-                <button type="submit">Enviar valoración</button>
-              </form>
+            {/* Mostrar formulario de valoración solo si el usuario está inscrito */}
+            {isInscribed ? (
+              isEventFinished ? (
+                <form onSubmit={handleSubmit} className="rating-form">
+                  <h3>Valorar y comentar evento</h3>
+                  <div>
+                    <label htmlFor="rating">Puntuación (1-5):</label>
+                    <input
+                      type="number"
+                      id="rating"
+                      value={rating}
+                      onChange={(e) => setRating(e.target.value)}
+                      min="1"
+                      max="5"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="comment">Comentario:</label>
+                    <textarea
+                      id="comment"
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      maxLength="300"
+                      required
+                    ></textarea>
+                  </div>
+                  <button type="submit">Enviar valoración</button>
+                </form>
+              ) : (
+                <p>El evento aún no ha finalizado, no se puede valorar.</p>
+              )
             ) : (
-              <p>El evento aún no ha finalizado, no se puede valorar.</p>
-            )
-          ) : (
-            <p>Debes inscribirte para poder valorar este evento.</p>
-          )}
+              <p>Debes inscribirte para poder valorar este evento.</p>
+            )}
 
-          <button onClick={() => navigate("/")} className="back-button">
-            Volver
-          </button>
-        </div>
-      ) : (
-        <p>Cargando detalles del evento...</p>
-      )}
+            <button onClick={() => navigate("/")} className="back-button">
+              Volver
+            </button>
+          </div>
+        ) : (
+          <p>Cargando detalles del evento...</p>
+        )}
+      </div>
     </div>
   );
 };
