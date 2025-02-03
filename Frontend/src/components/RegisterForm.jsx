@@ -1,7 +1,7 @@
 // src/components/RegisterForm.jsx
 
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
@@ -104,6 +104,11 @@ const RegisterForm = () => {
         {error && <p className="error">{error}</p>}
         <button type="submit">Registrarse</button>
       </form>
+      <div className="back-to-login">
+        <p>
+          ¿Ya tienes cuenta? <Link to="/login">Inicia sesión aquí</Link>
+        </p>
+      </div>
     </div>
   );
 };
