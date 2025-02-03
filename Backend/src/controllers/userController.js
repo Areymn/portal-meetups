@@ -629,6 +629,30 @@ export const getUserProfile = async (req, res) => {
   }
 };
 
+//**ELIMINAR CUENTA */
+
+export const deleteUser = async (req, res) => {
+  try {
+    // Suponemos que el middleware de autenticación ya coloca al usuario en req.user
+    const userId = req.user && req.user.id;
+    if (!userId) {
+      return res.status(401).json({ error: "Usuario no autenticado" });
+    }
+    const pool = await getPool();
+    // Eliminar el usuario de la base de datos (ajusta la consulta según tu esquema)
+    const [result] = await pool.query("DELETE FROM users WHERE id = ?", [
+      userId,
+    ]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+    return res.status(200).json({ message: "Cuenta eliminada con éxito" });
+  } catch (error) {
+    console.error("Error al eliminar la cuenta:", error);
+    return res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
 // Exportar las funciones
 export default {
   registerUser,
@@ -640,4 +664,5 @@ export default {
   // sendPasswordResetNotification,
   updateUserProfile,
   getUserProfile,
+  deleteUser,
 };
