@@ -3,15 +3,13 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate,
   Link,
-  useLocation, // 👈 Nuevo Hook para controlar la ubicación
+  useLocation,
 } from "react-router-dom";
 import "./styles.css";
 import { UserProvider, useUserContext } from "./context/UserContext";
 import MeetupForm from "./components/MeetupForm";
 import MeetupPage from "./components/MeetupPage";
-
 import RegisterForm from "./components/RegisterForm";
 import LoginForm from "./components/LoginForm";
 import UserValidationForm from "./components/UserValidationForm";
@@ -26,63 +24,44 @@ import NotFound from "./components/NotFound";
 import ProfilePage from "./components/ProfilePage";
 import "./App.css";
 
-// ✅ Navbar solo se muestra si NO estamos en Login o Register
+// Componente Navbar actualizado para incluir el enlace "Crear Meetup"
 const Navbar = () => {
   const { user, logout } = useUserContext();
   const location = useLocation();
 
-  // Ocultar Navbar en Login y Registro
-  if (location.pathname === "/login" || location.pathname === "/register") {
+  // Ocultar la Navbar en rutas de autenticación, registro o recuperación de contraseña
+  if (
+    location.pathname.startsWith("/login") ||
+    location.pathname.startsWith("/register") ||
+    location.pathname.startsWith("/password-")
+  ) {
     return null;
   }
 
   return (
-    <nav
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        padding: "10px",
-        background: "#007bff",
-      }}
-    >
-      <div>
+    <nav className="navbar">
+      <div className="navbar-left">
         {user && (
-          <Link
-            to="/"
-            style={{
-              marginRight: "15px",
-              color: "#fff",
-              textDecoration: "none",
-            }}
-          >
-            Eventos
-          </Link>
-        )}
-        {user && (
-          <Link to="/profile" style={{ color: "#fff", textDecoration: "none" }}>
-            Perfil
-          </Link>
+          <>
+            <Link to="/" className="navbar-link">
+              Eventos
+            </Link>
+            <Link to="/meetups/form" className="navbar-link">
+              Crear Meetup
+            </Link>
+            <Link to="/profile" className="navbar-link">
+              Perfil
+            </Link>
+          </>
         )}
       </div>
-      <div>
+      <div className="navbar-right">
         {user ? (
-          <button
-            onClick={logout}
-            style={{
-              background: "#dc3545",
-              color: "#fff",
-              border: "none",
-              padding: "8px 12px",
-              cursor: "pointer",
-            }}
-          >
+          <button onClick={logout} className="navbar-button">
             Cerrar Sesión
           </button>
         ) : (
-          <Link
-            to="/register"
-            style={{ color: "#fff", textDecoration: "none" }}
-          >
+          <Link to="/register" className="navbar-link">
             Registrarse
           </Link>
         )}
@@ -102,7 +81,7 @@ const App = () => {
   return (
     <UserProvider>
       <Router>
-        <Navbar /> {/* ✅ Ahora solo aparece en páginas protegidas */}
+        <Navbar /> {/* Barra de navegación global */}
         <div className="App">
           <Routes>
             <Route
@@ -145,7 +124,6 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path="/meetups/form"
               element={
@@ -154,7 +132,6 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

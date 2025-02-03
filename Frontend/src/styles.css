@@ -335,3 +335,40 @@ button:hover {
 .not-found .back-home:hover {
   background-color: #0056b3;
 }
+
+/** BARRA NAVEGACION**/
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #007bff;
+}
+
+.navbar-left,
+.navbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-link {
+  color: #fff;
+  text-decoration: none;
+  margin-right: 15px;
+  font-weight: 500;
+}
+
+.navbar-button {
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.navbar-link:hover,
+.navbar-button:hover {
+  opacity: 0.8;
+}
