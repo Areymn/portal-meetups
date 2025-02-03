@@ -17,6 +17,10 @@ import {
 import { handleFileUpload } from "../middlewares/uploadMiddleware.js";
 import { getUserProfile } from "../controllers/userController.js";
 
+import { deleteUser } from "../controllers/userController.js";
+
+// import { deleteUser } from "../controllers/deleteUser.js";
+
 const router = Router(); // Crear una instancia del router de Express
 
 // ------------------------- RUTAS DE USUARIOS -------------------------
@@ -81,6 +85,8 @@ router.patch(
 
 // Ruta para subir una foto de perfil con autenticación
 router.post("/profile/upload", authenticateUser, handleFileUpload);
+
+router.delete("/me", authenticateUser, deleteUser);
 
 // ------------------------- EXPORTAR RUTAS -------------------------
 export default router;

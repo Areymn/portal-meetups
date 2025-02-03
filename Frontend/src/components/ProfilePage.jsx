@@ -5,29 +5,42 @@ import UploadAvatar from "./UploadAvatar";
 import ProfileForm from "./ProfileForm";
 import ChangePasswordForm from "./ChangePasswordForm";
 import { useUserContext } from "../context/UserContext";
+import { useNavigate } from "react-router-dom";
 
 const ProfilePage = () => {
-  const { user } = useUserContext();
+  const { user, logout, authenticatedFetch } = useUserContext();
+  const navigate = useNavigate();
+
   if (!user) return <p>Cargando perfil...</p>;
 
-  // Aquí añadimos el useEffect para depuración del avatar:
   useEffect(() => {
     console.log("Avatar actualizado en el contexto:", user.avatar);
   }, [user.avatar]);
 
-  // Agregamos un query param con el timestamp para evitar el cacheo del navegador
+  // Agregamos un query param para evitar cacheo en el avatar
   const avatarSrc = user.avatar
     ? `http://localhost:5000/${user.avatar}?t=${new Date().getTime()}`
     : "/default-avatar.png";
   console.log("Avatar URL:", avatarSrc);
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
     const confirmDelete = window.confirm(
       "¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer."
     );
     if (confirmDelete) {
-      console.log("Cuenta eliminada (simulado)");
-      // Aquí iría la lógica para eliminar la cuenta en el backend
+      try {
+        // Llamar al endpoint para borrar la cuenta (DELETE /api/users/me)
+        await authenticatedFetch("http://localhost:5000/api/users/me", {
+          method: "DELETE",
+        });
+        alert("Cuenta eliminada con éxito");
+        // Se elimina la cuenta y se cierra la sesión:
+        logout(); // Esta función ya limpia localStorage y actualiza el estado
+        navigate("/login");
+      } catch (error) {
+        console.error("Error al eliminar la cuenta:", error);
+        alert("Error al eliminar la cuenta");
+      }
     }
   };
 
