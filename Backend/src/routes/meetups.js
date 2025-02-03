@@ -31,7 +31,7 @@ router.post("/", authenticateUser, createEvents);
 router.get("/:id/detail", authenticateUser, detailEvent);
 
 // Ruta para editar un evento
-router.put("/edit/:id", authenticateUser, editEvent);
+router.put("/:id", authenticateUser, editEvent);
 
 // Ruta para inscribirse en un evento
 router.post("/:id/signup", authenticateUser, signUpEvent);

@@ -2,6 +2,7 @@
 
 import moment from "moment";
 import mysql from "mysql2/promise";
+import getPool from "./getPool.js";
 
 // Configuración de la conexión (ajusta las variables o usa variables de entorno)
 const pool = mysql.createPool({
@@ -165,25 +166,48 @@ async function deleteEvent(id) {
  * @returns {Object|Array|null} - El evento encontrado, un arreglo de eventos o null si no hay coincidencias.
  */
 async function getEvents(id = null) {
+  const pool = await getPool();
   try {
     if (id !== null) {
-      const sql = `SELECT * FROM events WHERE id = ?;`;
+      const sql = "SELECT * FROM events WHERE id = ?";
       const [rows] = await pool.execute(sql, [id]);
       if (rows.length === 0) return null;
-      const event = rows[0];
-      event.attendees = event.attendees ? JSON.parse(event.attendees) : [];
+      let event = rows[0];
+      // Parsear el campo attendees
+      event.attendees = parseAttendees(event.attendees);
       return event;
     } else {
-      const sql = `SELECT * FROM events;`;
+      const sql = "SELECT * FROM events;";
       const [rows] = await pool.execute(sql);
-      for (const row of rows) {
-        row.attendees = row.attendees ? JSON.parse(row.attendees) : [];
+      for (let row of rows) {
+        row.attendees = parseAttendees(row.attendees);
       }
       return rows;
     }
   } catch (err) {
     console.error("Error al obtener eventos:", err);
     throw err;
+  }
+}
+
+// Función auxiliar para parsear el campo attendees de forma segura
+function parseAttendees(raw) {
+  // Si raw no es una cadena o es falsy, retorna un arreglo vacío
+  if (typeof raw !== "string" || !raw) {
+    return [];
+  }
+  // Eliminar espacios en blanco alrededor
+  const trimmed = raw.trim();
+  // Si la cadena está vacía, retorna un arreglo vacío
+  if (trimmed === "") {
+    return [];
+  }
+  try {
+    const parsed = JSON.parse(trimmed);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    console.error("Error al parsear attendees:", e);
+    return [];
   }
 }
 

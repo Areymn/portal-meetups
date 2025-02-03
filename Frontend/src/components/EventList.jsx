@@ -213,13 +213,32 @@ const EventList = () => {
                   <strong>Fecha:</strong>{" "}
                   {new Date(event.date).toLocaleDateString()}
                 </p>
-                {/* Indicador de inscripción en línea, como antes */}
+                <Link to={`/events/${event.id}`}>Ver detalles</Link>
+                {/* Mostrar el enlace "Editar" solo si el evento fue creado por el usuario actual */}
+                {user &&
+                  event.user &&
+                  user.username &&
+                  event.user.trim().toLowerCase() ===
+                    user.username.trim().toLowerCase() && (
+                    <Link
+                      to={`/meetups/form/${event.id}`}
+                      style={{ marginLeft: "1em" }}
+                    >
+                      Editar
+                    </Link>
+                  )}
                 {isInscribed ? (
-                  <span style={{ color: "green" }} title="Ya inscrito">
+                  <span
+                    style={{ marginLeft: "0.5em", color: "green" }}
+                    title="Ya inscrito"
+                  >
                     <FontAwesomeIcon icon={faCheckCircle} /> Inscrito
                   </span>
                 ) : (
-                  <span style={{ color: "red" }} title="No inscrito">
+                  <span
+                    style={{ marginLeft: "0.5em", color: "red" }}
+                    title="No inscrito"
+                  >
                     <FontAwesomeIcon icon={faExclamationCircle} /> No inscrito
                   </span>
                 )}
@@ -231,8 +250,6 @@ const EventList = () => {
                     (Finalizado)
                   </span>
                 )}
-                <br />
-                <Link to={`/events/${event.id}`}>Ver detalles</Link>
               </li>
             );
           })}
